@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "matrix-types"
+version = "0.1.0"
+authors = ["Florian Breit <florian@florian.me.uk>"]
+license = "MIT"
+description = "Matrix and FrozenMatrix types in pure Python."
+readme = "README.rst"
+packages = [{include = "matrix_types"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+more-itertools = "^9.1.0"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+flake8-pyproject = "^1.2.2"
+tox = "^4.4.8"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.2.2"
+
+[tool.flake8]
+max-line-length = 100
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tox]
+isolated_build = true
+envlist = ["py310", "py311"]
+
+[testenv]
+deps = ["pytest"]
+commands = ["pytest"]
