@@ -616,7 +616,6 @@ class TestMatrixDataAccess:
         """Make a 3x3 test matrix."""
         return Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]], default=0)
 
-    @pytest.mark.skip("Not yet implemented")
     def test_submatrix(self):
         """Test making submatrices."""
         m = self._make_3x3_test_matrix()
@@ -920,34 +919,244 @@ class TestMatrixDunders:
         assert 0 not in m
         assert 10 not in m
 
-    @pytest.mark.skip("Test to be written, mirror matadd/scaladd")
     def test__add__(self):
         """Test + / __add__."""
+        m = self._make_3x3_test_matrix()
+        n = self._make_3x3_test_matrix()
+        # Matrix addition, same size...
+        t = m + n
+        for x in (m, n):
+            assert x[0, 0] == 1
+            assert x[0, 1] == 2
+            assert x[0, 2] == 3
+            assert x[1, 0] == 4
+            assert x[1, 1] == 5
+            assert x[1, 2] == 6
+            assert x[2, 0] == 7
+            assert x[2, 1] == 8
+            assert x[2, 2] == 9
+        assert t[0, 0] == 1 + 1
+        assert t[0, 1] == 2 + 2
+        assert t[0, 2] == 3 + 3
+        assert t[1, 0] == 4 + 4
+        assert t[1, 1] == 5 + 5
+        assert t[1, 2] == 6 + 6
+        assert t[2, 0] == 7 + 7
+        assert t[2, 1] == 8 + 8
+        assert t[2, 2] == 9 + 9
+        assert m._shape == (3, 3)
+        assert n._shape == (3, 3)
+        assert t._shape == (3, 3)
+        # Matrix addition, different sizes...
+        o = Matrix([[1, 2, 3]], default=0)
+        with pytest.raises(ValueError):
+            t = m + o
+        p = Matrix([[1], [2], [3]], default=0)
+        with pytest.raises(ValueError):
+            t = m + p
+        # Scalar addition
+        s = 4
+        t = m + s
+        assert t[0, 0] == 1 + s
+        assert t[0, 1] == 2 + s
+        assert t[0, 2] == 3 + s
+        assert t[1, 0] == 4 + s
+        assert t[1, 1] == 5 + s
+        assert t[1, 2] == 6 + s
+        assert t[2, 0] == 7 + s
+        assert t[2, 1] == 8 + s
+        assert t[2, 2] == 9 + s
+        assert t._shape == (3, 3)
 
-    @pytest.mark.skip("Test to be written, mirror imatadd/iscaladd")
     def test__iadd__(self):
         """Test += / __iadd__."""
+        m = self._make_3x3_test_matrix()
+        n = self._make_3x3_test_matrix()
+        # Matrix addition, same size...
+        m += n
+        assert n[0, 0] == 1
+        assert n[0, 1] == 2
+        assert n[0, 2] == 3
+        assert n[1, 0] == 4
+        assert n[1, 1] == 5
+        assert n[1, 2] == 6
+        assert n[2, 0] == 7
+        assert n[2, 1] == 8
+        assert n[2, 2] == 9
+        assert m[0, 0] == 1 + 1
+        assert m[0, 1] == 2 + 2
+        assert m[0, 2] == 3 + 3
+        assert m[1, 0] == 4 + 4
+        assert m[1, 1] == 5 + 5
+        assert m[1, 2] == 6 + 6
+        assert m[2, 0] == 7 + 7
+        assert m[2, 1] == 8 + 8
+        assert m[2, 2] == 9 + 9
+        assert m._shape == (3, 3)
+        assert n._shape == (3, 3)
+        # Matrix addition, different sizes...
+        o = Matrix([[1, 2, 3]], default=0)
+        with pytest.raises(ValueError):
+            m += o
+        p = Matrix([[1], [2], [3]], default=0)
+        with pytest.raises(ValueError):
+            m += p
+        assert m[0, 0] == 1 + 1
+        assert m[1, 1] == 5 + 5
+        assert m[2, 2] == 9 + 9
+        # Scalar addition
+        s = 4
+        n += s
+        assert n[0, 0] == 1 + s
+        assert n[0, 1] == 2 + s
+        assert n[0, 2] == 3 + s
+        assert n[1, 0] == 4 + s
+        assert n[1, 1] == 5 + s
+        assert n[1, 2] == 6 + s
+        assert n[2, 0] == 7 + s
+        assert n[2, 1] == 8 + s
+        assert n[2, 2] == 9 + s
+        assert n._shape == (3, 3)
 
-    @pytest.mark.skip("Test to be written, mirror matsub/scalsub")
     def test__sub__(self):
         """Test - / __sub__."""
+        m = self._make_3x3_test_matrix()
+        n = self._make_3x3_test_matrix()
+        # Matrix subtraction, same size...
+        t = m - n
+        for x in (m, n):
+            assert x[0, 0] == 1
+            assert x[0, 1] == 2
+            assert x[0, 2] == 3
+            assert x[1, 0] == 4
+            assert x[1, 1] == 5
+            assert x[1, 2] == 6
+            assert x[2, 0] == 7
+            assert x[2, 1] == 8
+            assert x[2, 2] == 9
+        assert t[0, 0] == 1 - 1
+        assert t[0, 1] == 2 - 2
+        assert t[0, 2] == 3 - 3
+        assert t[1, 0] == 4 - 4
+        assert t[1, 1] == 5 - 5
+        assert t[1, 2] == 6 - 6
+        assert t[2, 0] == 7 - 7
+        assert t[2, 1] == 8 - 8
+        assert t[2, 2] == 9 - 9
+        assert m._shape == (3, 3)
+        assert n._shape == (3, 3)
+        assert t._shape == (3, 3)
+        # Matrix subtraction, different sizes...
+        o = Matrix([[1, 2, 3]], default=0)
+        with pytest.raises(ValueError):
+            t = m - o
+        p = Matrix([[1], [2], [3]], default=0)
+        with pytest.raises(ValueError):
+            t = m - p
+        # Scalar subtraction
+        s = 4
+        t = m - s
+        assert t[0, 0] == 1 - s
+        assert t[0, 1] == 2 - s
+        assert t[0, 2] == 3 - s
+        assert t[1, 0] == 4 - s
+        assert t[1, 1] == 5 - s
+        assert t[1, 2] == 6 - s
+        assert t[2, 0] == 7 - s
+        assert t[2, 1] == 8 - s
+        assert t[2, 2] == 9 - s
+        assert t._shape == (3, 3)
 
-    @pytest.mark.skip("Test to be written, mirror imatsub/iscalsub")
     def test__isub__(self):
         """Test -= / __isub__."""
+        m = self._make_3x3_test_matrix()
+        n = self._make_3x3_test_matrix()
+        # Matrix addition, same size...
+        m -= n
+        assert n[0, 0] == 1
+        assert n[0, 1] == 2
+        assert n[0, 2] == 3
+        assert n[1, 0] == 4
+        assert n[1, 1] == 5
+        assert n[1, 2] == 6
+        assert n[2, 0] == 7
+        assert n[2, 1] == 8
+        assert n[2, 2] == 9
+        assert m[0, 0] == 1 - 1
+        assert m[0, 1] == 2 - 2
+        assert m[0, 2] == 3 - 3
+        assert m[1, 0] == 4 - 4
+        assert m[1, 1] == 5 - 5
+        assert m[1, 2] == 6 - 6
+        assert m[2, 0] == 7 - 7
+        assert m[2, 1] == 8 - 8
+        assert m[2, 2] == 9 - 9
+        assert m._shape == (3, 3)
+        assert n._shape == (3, 3)
+        # Matrix addition, different sizes...
+        o = Matrix([[1, 2, 3]], default=0)
+        with pytest.raises(ValueError):
+            m -= o
+        p = Matrix([[1], [2], [3]], default=0)
+        with pytest.raises(ValueError):
+            m -= p
+        assert m[0, 0] == 1 - 1
+        assert m[1, 1] == 5 - 5
+        assert m[2, 2] == 9 - 9
+        # Scalar addition
+        s = 4
+        n -= s
+        assert n[0, 0] == 1 - s
+        assert n[0, 1] == 2 - s
+        assert n[0, 2] == 3 - s
+        assert n[1, 0] == 4 - s
+        assert n[1, 1] == 5 - s
+        assert n[1, 2] == 6 - s
+        assert n[2, 0] == 7 - s
+        assert n[2, 1] == 8 - s
+        assert n[2, 2] == 9 - s
+        assert n._shape == (3, 3)
 
-    @pytest.mark.skip("Test to be written, mirror scalmul")
     def test__mul__(self):
         """Test * / __mul__."""
+        m = self._make_3x3_test_matrix()
+        t = m * 2
+        assert t.aslist() == [[2, 4, 6], [8, 10, 12], [14, 16, 18]]
+        assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
-    @pytest.mark.skip("Test to be written, mirror iscalmul")
     def test__imul__(self):
         """Test *= / __imul__."""
+        m = self._make_3x3_test_matrix()
+        m *= 2
+        assert m.aslist() == [[2, 4, 6], [8, 10, 12], [14, 16, 18]]
 
-    @pytest.mark.skip("Test to be written, mirror matmul")
     def test__matmul__(self):
         """Test * / __matmul__."""
+        m = self._make_3x3_test_matrix()
+        o = self._make_3x3_test_matrix()
+        t = m @ o
+        assert t.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
+        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        incompatible = Matrix([], shape=(2, 3), default=2)
+        with pytest.raises(ValueError):
+            m @ incompatible
+        with pytest.raises(ValueError):
+            incompatible @ m
+        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert incompatible.aslist() == [[2, 2, 2], [2, 2, 2]]
 
-    @pytest.mark.skip("Test to be written, mirror imatmul")
     def test__imatmul__(self):
         """Test *= / __imatmul__."""
+        m = self._make_3x3_test_matrix()
+        o = self._make_3x3_test_matrix()
+        m @= o
+        assert m.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
+        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        incompatible = Matrix([], shape=(2, 3), default=2)
+        with pytest.raises(ValueError):
+            m @= incompatible
+        with pytest.raises(ValueError):
+            incompatible @= m
+        assert m.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
+        assert incompatible.aslist() == [[2, 2, 2], [2, 2, 2]]

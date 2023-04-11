@@ -17,7 +17,7 @@ class Sentinel:
 NotGiven: Final = Sentinel("NotGiven", module_name="matrix_types")
 MISSING: Final = Sentinel("MISSING", module_name="matrix_types")
 
-IndexT: TypeAlias = slice | int
-DirectionT: TypeAlias = Literal["row"] | Literal["col"]
+IndexT: TypeAlias = slice | int | tuple[int, ...]
+RowColT: TypeAlias = Literal["row"] | Literal["col"]
 T = TypeVar("T")
 V = TypeVar("V")
