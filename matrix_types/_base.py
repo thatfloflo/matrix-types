@@ -1035,13 +1035,6 @@ class MatrixABC(ABC, Generic[T]):
             )
         return self.get(key[0], key[1])
 
-    @abstractmethod
-    def __setitem__(self, key: tuple[IndexT, IndexT], value: T) -> None:
-        raise NotImplementedError()
-
-    def __delitem__(self, key: tuple[IndexT, IndexT]) -> None:
-        self.__setitem__(key, self._default)
-
     def __iter__(self):
         raise NotImplementedError()
 

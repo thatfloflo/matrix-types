@@ -87,6 +87,9 @@ class Matrix(MatrixABC[T]):
     def __setitem__(self, key: tuple[IndexT, IndexT], value: T) -> None:
         raise NotImplementedError()
 
+    def __delitem__(self, key: tuple[IndexT, IndexT]) -> None:
+        self.__setitem__(key, self._default)
+
     # DUNDER METHODS
 
     def __iadd__(self, other: MatrixABC[V] | T) -> Self | Matrix[V]:

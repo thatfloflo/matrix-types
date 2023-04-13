@@ -1,335 +1,60 @@
 import pytest  # noqa: F401
 from matrix_types import Matrix
+from common import CommonInitTests, CommonGetterTests, CommonShapeTests
 
 
-class TestMatrixInitialisation:
+class TestInit(CommonInitTests):
 
-    def test_init_from_seqseq(self):
-        """Initialise with sequence of sequences."""
-        Matrix([[1, 2, 3], [4, 5, 6]], default=0)
-        Matrix([[1, 2, 3], [4, 5, 6]], shape=(2, 3), default=0)
-        Matrix([[1, 2, 3], [4, 5, 6]], (2, 3), default=0)
-        with pytest.raises(TypeError):
-            Matrix([[1, 2, 3], [4, 5, 6]])
-        with pytest.raises(TypeError):
-            Matrix([[1, 2, 3], [4, 5, 6]], shape=(2, 3))
-        with pytest.raises(TypeError):
-            Matrix([[1, 2, 3], [4, 5, 6]], (2, 3))
-        with pytest.raises(TypeError):
-            Matrix([[1, 2, 3], [4, 5, 6]], (2, 3), 0)
-
-    def test_init_from_matrix(self):
-        """Initialise from existing Matrix."""
-        m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
-        Matrix(m)
-        Matrix(m, default=-1)
-        Matrix(m, shape=(3, 2), default=-1)
-        Matrix(m, (3, 2), default=-1)
-
-    def test_init_from_flat_sequence(self):
-        """Initialise from a flat sequence."""
-        Matrix([1, 2, 3, 4, 5, 6], shape=(2, 3), default=0)
-        Matrix([1, 2, 3, 4, 5, 6], (2, 3), default=0)
-        with pytest.raises(TypeError):
-            Matrix([1, 2, 3, 4, 5, 6])
-        with pytest.raises(TypeError):
-            Matrix([1, 2, 3, 4, 5, 6], shape=(2, 3))
-        with pytest.raises(TypeError):
-            Matrix([1, 2, 3, 4, 5, 6], (2, 3))
-        with pytest.raises(TypeError):
-            Matrix([1, 2, 3, 4, 5, 6], default=0)
+    MatrixClass = Matrix
 
 
-class TestMatrixGetters:
+class TestGetters(CommonGetterTests):
 
-    def _make_2x3_test_matrix(self) -> Matrix:
-        """Make a 2x3 test matrix."""
-        return Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+    MatrixClass = Matrix
 
-    def test_get_indices(self):
-        """Test get() with (positive) indeces."""
+
+class TestMatrixShapes(CommonShapeTests):
+
+    MatrixClass = Matrix
+
+    def test_transpose_insitu(self):
+        """Check that transpose modifies and returns `self`."""
         m = self._make_2x3_test_matrix()
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 2
-        assert m.get(0, 2) == 3
-        assert m.get(1, 0) == 4
-        assert m.get(1, 1) == 5
-        assert m.get(1, 2) == 6
-
-    def test_get_indeces_negative(self):
-        """Test get() with negative indices."""
-        m = self._make_2x3_test_matrix()
-        assert m.get(-2, -3) == 1
-        assert m.get(-2, -2) == 2
-        assert m.get(-2, -1) == 3
-        assert m.get(-1, -3) == 4
-        assert m.get(-1, -2) == 5
-        assert m.get(-1, -1) == 6
-
-    def test_get_indeces_out_of_range(self):
-        """Test get() with indeces out of range."""
-        m = self._make_2x3_test_matrix()
-        with pytest.raises(IndexError):
-            m.get(0, 3)
-        with pytest.raises(IndexError):
-            m.get(2, 0)
-        with pytest.raises(IndexError):
-            m.get(0, -4)
-        with pytest.raises(IndexError):
-            m.get(-3, 0)
-
-    def test_getitem_indeces(self):
-        """Test __getitem__ with (positive) indeces."""
-        m = self._make_2x3_test_matrix()
-        assert m[0, 0] == 1
-        assert m[0, 1] == 2
-        assert m[0, 2] == 3
-        assert m[1, 0] == 4
-        assert m[1, 1] == 5
-        assert m[1, 2] == 6
-
-    def test_getitem_indeces_negative(self):
-        """Test __getitem__ with (positive) indeces."""
-        m = self._make_2x3_test_matrix()
-        assert m[-2, -3] == 1
-        assert m[-2, -2] == 2
-        assert m[-2, -1] == 3
-        assert m[-1, -3] == 4
-        assert m[-1, -2] == 5
-        assert m[-1, -1] == 6
-
-    def test_getitem_indeces_out_of_range(self):
-        """Test __getitem__ with indeces out of range."""
-        m = self._make_2x3_test_matrix()
-        with pytest.raises(IndexError):
-            m[0, 3]
-        with pytest.raises(IndexError):
-            m[2, 0]
-        with pytest.raises(IndexError):
-            m[0, -4]
-        with pytest.raises(IndexError):
-            m[-3, 0]
-
-    def test_getitem_missing_arg(self):
-        """Test __getitem__ with missing argument."""
-        m = self._make_2x3_test_matrix()
-        with pytest.raises(TypeError):
-            m[0]
-        with pytest.raises(TypeError):
-            m[0, ]
-        with pytest.raises(TypeError):
-            m[1:2:1]
-        with pytest.raises(TypeError):
-            m[None, None]
-
-    def test_getitem_slices(self):
-        """Test __getitem__ with slices."""
-        m = self._make_2x3_test_matrix()
-        assert m[0:, 0:].aslist() == [[1, 2, 3], [4, 5, 6]]
-        assert m[1:, 1:].aslist() == [[5, 6]]
-        assert m[0:2, 0:1].aslist() == [[1], [4]]
-        assert m[2:2, 1:1]._shape == (0, 0)
-        assert m[::2, ::1].aslist() == [[1, 2, 3]]
-        assert m[::1, ::2].aslist() == [[1, 3], [4, 6]]
-
-    def test_getitem_slices_negative(self):
-        """Test __getitem__ with negative."""
-        m = self._make_2x3_test_matrix()
-        #     0  1  2
-        #   ┌         ┐
-        # 0 │ 1  2  3 │
-        # 1 │ 4  5  6 │
-        #   └         ┘
-        assert m[-2:, -3:].aslist() == [[1, 2, 3], [4, 5, 6]]
-        assert m[-1:, -2:].aslist() == [[5, 6]]
-        assert m[0:2, 0:-2].aslist() == [[1], [4]]
-        assert m[0:-1, -3:].aslist() == [[1, 2, 3]]
-        assert m[-2:-2, -1:-1]._shape == (0, 0)
-        assert m[::2, ::1].aslist() == [[1, 2, 3]]
-        assert m[::1, ::2].aslist() == [[1, 3], [4, 6]]
-
-
-class TestMatrixShapes:
-
-    def _make_2x3_test_matrix(self) -> Matrix:
-        """Make a 2x3 test matrix."""
-        return Matrix([[1, 2, 3], [4, 5, 6]], default=0)
-
-    def _check_2x3_values(self, m: Matrix):
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 2
-        assert m.get(0, 2) == 3
-        assert m.get(1, 0) == 4
-        assert m.get(1, 1) == 5
-        assert m.get(1, 2) == 6
-
-    def test_from_list_of_list(self):
-        """Initialize Matrix from list of lists."""
-        m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+        t = m.transpose()
+        assert t is m
+        assert m.get(1, 0) == 2  # Make sure it did transpose
+        m.transpose()            # Back to normal
         self._check_2x3_values(m)
 
-    def test_from_tuple_of_tuples(self):
-        """Initialize Matrix from tuple of tuples."""
-        m = Matrix(((1, 2, 3), (4, 5, 6)), default=0)
-        self._check_2x3_values(m)
-
-    def test_from_flat_list(self):
-        """Initialize Matrix from a flat list."""
-        m = Matrix([1, 2, 3, 4, 5, 6], shape=(2, 3), default=0)
-        self._check_2x3_values(m)
-
-    def test_from_iterator(self):
-        """Initialize Matrix from a iterator."""
-        m = Matrix(range(1, 20), shape=(2, 3), default=0)
-        self._check_2x3_values(m)
-        print(m._data)
-        with pytest.raises(IndexError):
-            m.get(0, 3)
-        with pytest.raises(IndexError):
-            m.get(2, 0)
-
-    def test_from_matrix(self):
-        """Initialize from another Matrix."""
-        m = Matrix((1, 2, 3, 4, 5, 6), shape=(2, 3), default=0)
-        n = Matrix(m)
-        assert m is not n
-        assert m._shape == n._shape
-        assert m._data == m._data
-
-    def test_transpose(self):
-        """Transpose x1 and check values, transpose x3 and check values."""
+    def test_resize_insitu(self):
+        """Check that resize modifies and returns `self`."""
         m = self._make_2x3_test_matrix()
-        m.transpose()
-        assert m.get(0, 0) == 1
-        assert m.get(1, 0) == 2
-        assert m.get(2, 0) == 3
-        assert m.get(0, 1) == 4
-        assert m.get(1, 1) == 5
-        assert m.get(2, 1) == 6
-        m.transpose()  # Back to normal
-        m.transpose().transpose()  # Should have no effect
-        self._check_2x3_values(m)
-
-    def test_resize_grow(self):
-        """Resize->grow and check size and values."""
-        m = self._make_2x3_test_matrix()
-        m.resize(4, 4)
-        self._check_2x3_values(m)
+        t = m.resize(4, 4)
+        assert t is m
         assert m._shape == (4, 4)
-        assert m.get(2, 0) == 0
-        assert m.get(2, 1) == 0
-        assert m.get(2, 1) == 0
-        assert m.get(2, 2) == 0
-        assert m.get(2, 3) == 0
-        assert m.get(3, 0) == 0
-        assert m.get(3, 1) == 0
-        assert m.get(3, 2) == 0
-        assert m.get(3, 3) == 0
-        with pytest.raises(IndexError):
-            m.get(4, 0)
-        with pytest.raises(IndexError):
-            m.get(0, 4)
+        assert t._shape == (4, 4)
 
-    def test_resize_shrink(self):
-        """Resize->shrink and check size and values."""
-        m = self._make_2x3_test_matrix()
-        m.resize(1, 1)
-        assert m._shape == (1, 1)
-        assert m.get(0, 0) == 1
-        with pytest.raises(IndexError):
-            m.get(1, 0)
-        with pytest.raises(IndexError):
-            m.get(0, 1)
-
-    def test_resize_shrinkgrow(self):
-        """Resize->shrink->grow and check size and values."""
-        m = self._make_2x3_test_matrix()
-        m.resize(1, 1)
-        m.resize(2, 2)
-        assert m._shape == (2, 2)
-        assert m.get(0, 0) == 1
-        assert m.get(1, 0) == 0
-        assert m.get(0, 1) == 0
-        assert m.get(1, 1) == 0
-        with pytest.raises(IndexError):
-            m.get(2, 0)
-        with pytest.raises(IndexError):
-            m.get(0, 2)
-
-    def test_flip_default(self):
-        """Flip by rows (without specifying 'by' arg)."""
-        m = Matrix([[1, 1], [2, 2], [3, 3]], default=0)
+    def test_flip_insitu(self):
+        """Check that flip modifies and returns `self`."""
+        m = self.MatrixClass([[1, 1], [2, 2], [3, 3]], default=0)
         assert m._shape == (3, 2)
         assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 1
-        assert m.get(1, 0) == 2
-        assert m.get(1, 1) == 2
-        assert m.get(2, 0) == 3
-        assert m.get(2, 1) == 3
-        m.flip()
+        t = m.flip()
+        assert t is m
         assert m._shape == (3, 2)
         assert m.get(0, 0) == 3
-        assert m.get(0, 1) == 3
-        assert m.get(1, 0) == 2
-        assert m.get(1, 1) == 2
-        assert m.get(2, 0) == 1
-        assert m.get(2, 1) == 1
 
-    def test_flip_by_row(self):
-        """Flip by rows (without explicit 'by' arg)."""
-        m = Matrix([[1, 1], [2, 2], [3, 3]], default=0)
-        assert m._shape == (3, 2)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 1
-        assert m.get(1, 0) == 2
-        assert m.get(1, 1) == 2
-        assert m.get(2, 0) == 3
-        assert m.get(2, 1) == 3
-        m.flip(by="row")
-        assert m._shape == (3, 2)
-        assert m.get(0, 0) == 3
-        assert m.get(0, 1) == 3
-        assert m.get(1, 0) == 2
-        assert m.get(1, 1) == 2
-        assert m.get(2, 0) == 1
-        assert m.get(2, 1) == 1
+    def test_flipv_insitu(self):
+        """Check that flipv modifies and returns `self`."""
+        m = self.MatrixClass([[1, 1], [2, 2], [3, 3]], default=0)
+        t = m.flipv()
+        assert t is m
 
-    def test_flip_by_col(self):
-        """Flip by columns (with 'by' arg)."""
-        m = Matrix([[1, 2, 3], [1, 2, 3]], default=0)
-        assert m._shape == (2, 3)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 2
-        assert m.get(0, 2) == 3
-        assert m.get(1, 0) == 1
-        assert m.get(1, 1) == 2
-        assert m.get(1, 2) == 3
-        m.flip(by="col")
-        assert m._shape == (2, 3)
-        assert m.get(0, 0) == 3
-        assert m.get(0, 1) == 2
-        assert m.get(0, 2) == 1
-        assert m.get(1, 0) == 3
-        assert m.get(1, 1) == 2
-        assert m.get(1, 2) == 1
-
-    def test_flipv(self):
-        """Test that flipv is the same as flip(by="row")."""
-        m1 = Matrix([[1, 1], [2, 2], [3, 3]], default=0)
-        m2 = Matrix([[1, 1], [2, 2], [3, 3]], default=0)
-        m1.flip(by="row")
-        m2.flipv()
-        assert m1._data == m2._data
-        assert m1._shape == m2._shape
-
-    def test_fliph(self):
-        """Test that fliph is the same as flip(by="col")."""
-        m1 = Matrix([[1, 2, 3], [1, 2, 3]], default=0)
-        m2 = Matrix([[1, 2, 3], [1, 2, 3]], default=0)
-        m1.flip(by="col")
-        m2.fliph()
-        assert m1._data == m2._data
-        assert m1._shape == m2._shape
+    def test_fliph_insitu(self):
+        """Check that fliph modifies and returns `self`."""
+        m = self.MatrixClass([[1, 2, 3], [1, 2, 3]], default=0)
+        t = m.fliph()
+        assert t is m
 
 
 class TestMatrixRowOperations:
