@@ -3,7 +3,8 @@ from matrix_types import FrozenMatrix
 from common import (
     CommonInitTests, CommonGetterTests, CommonShapeTests,
     CommonRowOperationTests, CommonColumnOperationTests,
-    CommonDataAccessTests, CommonOperationTests
+    CommonDataAccessTests, CommonOperationTests,
+    CommonDunderTests
 )
 
 
@@ -154,3 +155,8 @@ class TestOperations(CommonOperationTests):
         t = m.map(lambda a: a**2)
         assert t is not m
         assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+
+
+class TestDunders(CommonDunderTests):
+
+    MatrixClass = FrozenMatrix
