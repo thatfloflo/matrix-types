@@ -1,6 +1,10 @@
 import pytest  # noqa: F401
 from matrix_types import FrozenMatrix
-from common import CommonInitTests, CommonGetterTests, CommonShapeTests, CommonRowOperationTests
+from common import (
+    CommonInitTests, CommonGetterTests, CommonShapeTests,
+    CommonRowOperationTests, CommonColumnOperationTests,
+    CommonDataAccessTests, CommonOperationTests
+)
 
 
 class TestInit(CommonInitTests):
@@ -126,3 +130,27 @@ class TestRowOperations(CommonRowOperationTests):
         with pytest.raises(IndexError) as excinfo:
             t.get(3, 0)
         assert "range" in str(excinfo.value)
+
+
+class TestMatrixColumnOperations(CommonColumnOperationTests):
+
+    MatrixClass = FrozenMatrix
+
+    # @TODO: Add immutability tests
+
+
+class TestDataAccess(CommonDataAccessTests):
+
+    MatrixClass = FrozenMatrix
+
+
+class TestOperations(CommonOperationTests):
+
+    MatrixClass = FrozenMatrix
+
+    def test_map_immutability(self):
+        """Test FrozenMatrix.map() doesn't modify or return `self`."""
+        m = self._make_3x3_test_matrix()
+        t = m.map(lambda a: a**2)
+        assert t is not m
+        assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]

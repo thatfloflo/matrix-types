@@ -1,6 +1,10 @@
 import pytest  # noqa: F401
 from matrix_types import Matrix
-from common import CommonInitTests, CommonGetterTests, CommonShapeTests, CommonRowOperationTests
+from common import (
+    CommonInitTests, CommonGetterTests, CommonShapeTests,
+    CommonRowOperationTests, CommonColumnOperationTests,
+    CommonDataAccessTests, CommonOperationTests
+)
 
 
 class TestInit(CommonInitTests):
@@ -113,254 +117,21 @@ class TestRowOperations(CommonRowOperationTests):
         assert "range" in str(excinfo.value)
 
 
-class TestMatrixColumnOperations:
+class TestMatrixColumnOperations(CommonColumnOperationTests):
 
-    def _make_2x3_test_matrix(self) -> Matrix:
-        """Make a 2x3 test matrix."""
-        return Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+    MatrixClass = Matrix
 
-    def test_insertcol_start(self):
-        """Insert a column at the beginning."""
-        m = self._make_2x3_test_matrix()
-        m.insertcol(0, [-1, -2])
-        assert m._shape == (2, 4)
-        assert m.get(0, 0) == -1
-        assert m.get(0, 1) == 1
-        assert m.get(0, 2) == 2
-        assert m.get(0, 3) == 3
-        assert m.get(1, 0) == -2
-        assert m.get(1, 1) == 4
-        assert m.get(1, 2) == 5
-        assert m.get(1, 3) == 6
-
-    def test_insertcol_middle(self):
-        """Insert a column at the middle."""
-        m = self._make_2x3_test_matrix()
-        m.insertcol(1, [-1, -2])
-        assert m._shape == (2, 4)
-        assert m.get(0, 1) == -1
-        assert m.get(1, 1) == -2
-
-    def test_insertcol_end(self):
-        """Insert a column at the end."""
-        m = self._make_2x3_test_matrix()
-        m.insertcol(3, [-1, -2])
-        assert m._shape == (2, 4)
-        assert m.get(0, 3) == -1
-        assert m.get(1, 3) == -2
-        with pytest.raises(IndexError):
-            m.get(0, 4)
-
-    def test_insertcol_after_end(self):
-        """Insert a column with index much past number of columns."""
-        m = self._make_2x3_test_matrix()
-        m.insertcol(23, [-1, -2])
-        assert m._shape == (2, 4)
-        assert m.get(0, 3) == -1
-        assert m.get(1, 3) == -2
-        with pytest.raises(IndexError):
-            m.get(0, 4)
-
-    def test_prependcol(self):
-        """Prepend a col."""
-        m = self._make_2x3_test_matrix()
-        m.prependcol([-1, -2])
-        assert m._shape == (2, 4)
-        assert m.get(0, 0) == -1
-        assert m.get(1, 0) == -2
-
-    def test_appendcol(self):
-        """Append a column."""
-        m = self._make_2x3_test_matrix()
-        m.appendcol([-1, -2])
-        assert m._shape == (2, 4)
-        assert m.get(0, 3) == -1
-        assert m.get(1, 3) == -2
-        with pytest.raises(IndexError):
-            m.get(0, 4)
-
-    def test_swapcols(self):
-        """Swap two columns."""
-        m = Matrix([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        m.swapcols(1, 3)
-        assert m._shape == (3, 4)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 4
-        assert m.get(1, 1) == 4
-        assert m.get(2, 1) == 4
-        assert m.get(1, 2) == 3
-        assert m.get(0, 3) == 2
-        assert m.get(1, 3) == 2
-        assert m.get(2, 3) == 2
-        assert m.get(2, 3) == 2
-
-    def test_swapcols_negative(self):
-        """Swap two columns using negative indices."""
-        m = Matrix([[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        m.swapcols(-1, -3)
-        assert m._shape == (3, 4)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 4
-        assert m.get(1, 1) == 4
-        assert m.get(2, 1) == 4
-        assert m.get(1, 2) == 3
-        assert m.get(0, 3) == 2
-        assert m.get(1, 3) == 2
-        assert m.get(2, 3) == 2
-        assert m.get(2, 3) == 2
-
-    def test_swapcols_out_of_range(self):
-        """Attempt to swap columns out of range."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        with pytest.raises(IndexError):
-            m.swapcols(1, 4)
-
-    def test_delcol(self):
-        """Delete a column."""
-        m = Matrix([[1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        m.delcol(1)
-        assert m._shape == (2, 3)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 3
-        assert m.get(0, 2) == 4
-        assert m.get(1, 0) == 1
-        assert m.get(1, 1) == 3
-        assert m.get(1, 2) == 4
-        with pytest.raises(IndexError):
-            m.get(0, 3)
-
-    def test_delcol_negative(self):
-        """Delete a column using a negative index."""
-        m = Matrix([[1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        m.delcol(-3)
-        assert m._shape == (2, 3)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 3
-        assert m.get(0, 2) == 4
-        assert m.get(1, 0) == 1
-        assert m.get(1, 1) == 3
-        assert m.get(1, 2) == 4
-        with pytest.raises(IndexError):
-            m.get(0, 3)
-
-    def test_delcol_out_of_range(self):
-        """Attempt to delete a column out of range."""
-        m = Matrix([[1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        with pytest.raises(IndexError):
-            m.delcol(4)
-        with pytest.raises(IndexError):
-            m.delcol(-5)
-        assert m._shape == (2, 4)
+    # @TODO: Add in-situ mutability tests
 
 
-class TestMatrixDataAccess:
+class TestDataAccess(CommonDataAccessTests):
 
-    def _make_3x3_test_matrix(self) -> Matrix:
-        """Make a 3x3 test matrix."""
-        return Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]], default=0)
-
-    def test_submatrix(self):
-        """Test making submatrices."""
-        m = self._make_3x3_test_matrix()
-        t = m.submatrix((0, 1), (0, 1, 2))
-        assert t._shape == (2, 3)
-        assert t.get(0, 0) == 1
-        assert t.get(0, 1) == 2
-        assert t.get(0, 2) == 3
-        assert t.get(1, 0) == 4
-        assert t.get(1, 1) == 5
-        assert t.get(1, 2) == 6
-        with pytest.raises(IndexError):
-            t.get(2, 0)
-        t = m.submatrix((1, ), (1, ))
-        assert t._shape == (1, 1)
-        assert t.get(0, 0) == 5
-        with pytest.raises(IndexError):
-            t.get(0, 1)
-        with pytest.raises(IndexError):
-            t.get(1, 0)
-        assert m._shape == (3, 3)
-
-    def test_flatten_by_default(self):
-        """Test flattening Matrix data to list with by=default."""
-        m = self._make_3x3_test_matrix()
-        t = m.flatten()
-        assert isinstance(t, list)
-        assert all(isinstance(x, int) for x in t)
-        assert len(t) == m._shape[0] * m._shape[1]
-        assert t == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-    def test_flatten_by_row(self):
-        """Test flattening Matrix data to list with by="row"."""
-        m = self._make_3x3_test_matrix()
-        t = m.flatten(by="row")
-        assert isinstance(t, list)
-        assert all(isinstance(x, int) for x in t)
-        assert len(t) == m._shape[0] * m._shape[1]
-        assert t == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-    def test_flatten_by_column(self):
-        """Test flattening Matrix data to list with by="col"."""
-        m = self._make_3x3_test_matrix()
-        t = m.flatten(by="col")
-        assert isinstance(t, list)
-        assert all(isinstance(x, int) for x in t)
-        assert len(t) == m._shape[0] * m._shape[1]
-        assert t == [1, 4, 7, 2, 5, 8, 3, 6, 9]
-
-    def test_aslist_by_default(self):
-        """Test fetching Matrix data as list of lists with by=default."""
-        m = self._make_3x3_test_matrix()
-        t = m.aslist()
-        assert isinstance(t, list)
-        assert all(isinstance(x, list) for x in t)
-        assert len(t) == m._shape[0]
-        assert all(len(x) == m._shape[1] for x in t)
-        assert t == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def test_aslist_by_row(self):
-        """Test fetching Matrix data as list of lists with by="row."""
-        m = self._make_3x3_test_matrix()
-        t = m.aslist(by="row")
-        assert isinstance(t, list)
-        assert all(isinstance(x, list) for x in t)
-        assert len(t) == m._shape[0]
-        assert all(len(x) == m._shape[1] for x in t)
-        assert t == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def test_aslist_by_column(self):
-        """Test fetching Matrix data as list of lists with by="col."""
-        m = self._make_3x3_test_matrix()
-        t = m.aslist(by="col")
-        assert isinstance(t, list)
-        assert all(isinstance(x, list) for x in t)
-        assert len(t) == m._shape[1]
-        assert all(len(x) == m._shape[0] for x in t)
-        assert t == [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
-
-    def test_asdict(self):
-        """Test fetching Matrix data as dict."""
-        m = self._make_3x3_test_matrix()
-        t = m.asdict()
-        assert len(t) == m._shape[0] * m._shape[1]
-        assert t == {
-            (0, 0): 1,
-            (0, 1): 2,
-            (0, 2): 3,
-            (1, 0): 4,
-            (1, 1): 5,
-            (1, 2): 6,
-            (2, 0): 7,
-            (2, 1): 8,
-            (2, 2): 9,
-        }
+    MatrixClass = Matrix
 
 
-class TestMatrixOperations:
+class TestOperations(CommonOperationTests):
 
-    def _make_3x3_test_matrix(self) -> Matrix:
-        """Make a 3x3 test matrix."""
-        return Matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]], default=0)
+    MatrixClass = Matrix
 
     def test_imatadd(self):
         """Test in-situ matrix addition."""
@@ -370,30 +141,12 @@ class TestMatrixOperations:
         assert m.flatten() == [2, 4, 6, 8, 10, 12, 14, 16, 18]
         assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    def test_matadd(self):
-        """Test regular matrix addition."""
-        m = self._make_3x3_test_matrix()
-        o = self._make_3x3_test_matrix()
-        t = m.matadd(o)
-        assert t.flatten() == [2, 4, 6, 8, 10, 12, 14, 16, 18]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
     def test_imatsub(self):
         """Test in-situ matrix subtraction."""
         m = self._make_3x3_test_matrix()
         o = self._make_3x3_test_matrix()
         m.imatsub(o)
         assert m.flatten() == [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-    def test_matsub(self):
-        """Test regular matrix subtraction."""
-        m = self._make_3x3_test_matrix()
-        o = self._make_3x3_test_matrix()
-        t = m.matsub(o)
-        assert t.flatten() == [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
         assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test_imatmul(self):
@@ -410,33 +163,11 @@ class TestMatrixOperations:
             incompatible.imatmul(m)
         assert m.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
 
-    def test_matmul(self):
-        """Test regular matrix multiplication."""
-        m = self._make_3x3_test_matrix()
-        o = self._make_3x3_test_matrix()
-        t = m.matmul(o)
-        assert t.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        incompatible = Matrix([], shape=(2, 3), default=0)
-        with pytest.raises(ValueError):
-            m.matmul(incompatible)
-        with pytest.raises(ValueError):
-            incompatible.matmul(m)
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
     def test_iscaladd(self):
         """Test in-situ scalar addition."""
         m = self._make_3x3_test_matrix()
         m.iscaladd(2)
         assert m.aslist() == [[3, 4, 5], [6, 7, 8], [9, 10, 11]]
-
-    def test_scaladd(self):
-        """Test regular scalar addition."""
-        m = self._make_3x3_test_matrix()
-        t = m.scaladd(2)
-        assert t.aslist() == [[3, 4, 5], [6, 7, 8], [9, 10, 11]]
-        assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
     def test_iscalsub(self):
         """Test in-situ scalar subtraction."""
@@ -444,38 +175,17 @@ class TestMatrixOperations:
         m.iscalsub(2)
         assert m.aslist() == [[-1, 0, 1], [2, 3, 4], [5, 6, 7]]
 
-    def test_scalsub(self):
-        """Test regular scalar subtraction."""
-        m = self._make_3x3_test_matrix()
-        t = m.scalsub(2)
-        assert t.aslist() == [[-1, 0, 1], [2, 3, 4], [5, 6, 7]]
-        assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
     def test_iscalmul(self):
         """Test in-situ scalar multiplication."""
         m = self._make_3x3_test_matrix()
         m.iscalmul(2)
         assert m.aslist() == [[2, 4, 6], [8, 10, 12], [14, 16, 18]]
 
-    def test_scalmul(self):
-        """Test regular scalar subtraction."""
+    def test_map_insitu(self):
+        """Test Matrix.map() works in-situ and returns `self`."""
         m = self._make_3x3_test_matrix()
-        t = m.scalmul(2)
-        assert t.aslist() == [[2, 4, 6], [8, 10, 12], [14, 16, 18]]
-        assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def test_foreach(self):
-        """Test Matrix.foreach()."""
-        m = self._make_3x3_test_matrix()
-        collection = []
-        m.foreach(lambda a: collection.append(a**2))
-        assert collection == [1, 4, 9, 16, 25, 36, 49, 64, 81]
-        assert m.aslist() == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-    def test_map(self):
-        """Test Matrix.map()."""
-        m = self._make_3x3_test_matrix()
-        m.map(lambda a: a**2)
+        t = m.map(lambda a: a**2)
+        assert t is m
         assert m.aslist() == [[1, 4, 9], [16, 25, 36], [49, 64, 81]]
 
 
