@@ -52,6 +52,28 @@ class MatrixABC(ABC, Generic[T]):
         ...
 
     def __init__(self, *args: Any, **kwargs: Any):
+        """Initialise a new Matrix/FrozenMatrix instance.
+
+        :param MatrixABC[T] | Sequence[T] | Sequence[Sequence[T]] data: The
+            initial data for the matrix. This can be another `MatrixT` instance,
+            a sequence of values, or a sequence of a sequence of values.
+            This argument is required, but you can simply pass an empty sequence
+            (e.g. :code:`[]`) to have the matrix filled with *default* instead.
+        :param tuple[int, int] shape: The shape the matrix should have, as a
+            tuple specifying :code:`(rows, cols)`. This argument is required if
+            *data* is a flat sequence. If *data* is a sequence of sequences or
+            another `MatrixT`, then *shape* will be inferred if it is not
+            provided, or *data* will be reshaped to *shape* if it is provided
+            and doesn't presently conform to *shape*.
+        :param T default: A keyword-only argument specifying the default value
+            for matrix cells. This will be used to fill in the value for cells
+            which do not have one assigned, are deleted, newly inserted, etc.
+            It is also used as in evaluating the truthiness of a `MatrixT` (a
+            `MatrixT` is :code:`True` if at least one of its cells' values is
+            **not** equal to *default*). The *default* argument is required
+            unless *data* is of type `MatrixT`, in which case it will be
+            inferred if not explicity specified.
+        """
         # Make args/kwargs uniform (data, shape, default=default)
         args: list[Any] = list(args)
         if "data" in kwargs:
@@ -173,6 +195,7 @@ class MatrixABC(ABC, Generic[T]):
         self._colrange = range(0, self._shape[1])
 
     def _check_shape(self, shape: tuple[int, int]):
+        """Checks whether a shape tuple is valid in terms of values."""
         if shape[0] < 0:
             raise ValueError("Row count cannot be negative.")
         if shape[1] < 0:
@@ -279,20 +302,23 @@ class MatrixABC(ABC, Generic[T]):
         """Transposes the rows and columns of the matrix.
 
         This has the effect of turning a matrix such as
-        ```
-        ┌         ┐
-        │ 1  2  3 │
-        │ 4  5  6 │
-        └         ┘
-        ```
+
+        .. code-block::
+
+                ┌         ┐
+                │ 1  2  3 │
+                │ 4  5  6 │
+                └         ┘
+
         into the matrix
-        ```
-        ┌      ┐
-        │ 1  4 │
-        │ 2  5 │
-        │ 3  6 │
-        └      ┘
-        ```
+
+        .. code-block::
+
+            ┌      ┐
+            │ 1  4 │
+            │ 2  5 │
+            │ 3  6 │
+            └      ┘
 
         Modifies the matrix in-situ if it is mutable, otherwise returns a
         transposed copy of the matrix.
@@ -386,8 +412,9 @@ class MatrixABC(ABC, Generic[T]):
         by the keyword-only argument *by*. The default is *row*, which flips
         the matrix vertically.
 
-        `m.flip()` and `m.flip(by="row")` are equivalent to `m.flipv()`.
-        `m.flip(by="column")` is equivalent to `m.fliph()`.
+        :code:`m.flip()` and :code:`m.flip(by="row")` are equivalent to
+        :code:`m.flipv()`.
+        :code:`m.flip(by="column")` is equivalent to :code:`m.fliph()`.
 
         :param by: Whether to flop rowwise or columnwise, must be one of the
             literal strings :code:`"row"` (the default) or :code:`"col"`.
@@ -401,19 +428,22 @@ class MatrixABC(ABC, Generic[T]):
         This effectively reverses the order of the columns of the matrix.
 
         This has the effect of turning a matrix such as
-        ```
-        ┌         ┐
-        │ 1  2  3 │
-        │ 4  5  6 │
-        └         ┘
-        ```
+
+        .. code-block::
+
+            ┌         ┐
+            │ 1  2  3 │
+            │ 4  5  6 │
+            └         ┘
+
         into the matrix
-        ```
-        ┌         ┐
-        │ 3  2  1 │
-        │ 6  5  4 │
-        └         ┘
-        ```
+
+        .. code-block::
+
+            ┌         ┐
+            │ 3  2  1 │
+            │ 6  5  4 │
+            └         ┘
 
         Modifies the matrix in-situ if the matrix is mutable, otherwise returns
         a copy of the matrix with the order of columns reversed.
@@ -428,21 +458,24 @@ class MatrixABC(ABC, Generic[T]):
         This effectively reverses the order of the rows of the matrix.
 
         This has the effect of turning a matrix such as
-        ```
-        ┌         ┐
-        │ 1  2  3 │
-        │ 4  5  6 │
-        │ 7  8  9 │
-        └         ┘
-        ```
+
+        .. code-block::
+
+            ┌         ┐
+            │ 1  2  3 │
+            │ 4  5  6 │
+            │ 7  8  9 │
+            └         ┘
+
         into the matrix
-        ```
-        ┌         ┐
-        │ 7  8  9 │
-        │ 4  5  6 │
-        │ 1  2  3 │
-        └         ┘
-        ```
+
+        .. code-block::
+
+            ┌         ┐
+            │ 7  8  9 │
+            │ 4  5  6 │
+            │ 1  2  3 │
+            └         ┘
 
         Modifies the matrix in-situ if the matrix is mutable, otherwise returns
         a copy of the matrix with the order of rows reversed.
@@ -948,23 +981,27 @@ class MatrixABC(ABC, Generic[T]):
         The returned dictionary's keys are tuples of the form `(row, column)`.
 
         For example, the matrix
-        ```
-        ┌         ┐
-        │ 1  2  3 │
-        │ 4  5  6 │
-        └         ┘
-        ```
+
+        .. code-block::
+
+            ┌         ┐
+            │ 1  2  3 │
+            │ 4  5  6 │
+            └         ┘
+
         will be returned as a dict of the form
-        ```
-        {
-            (0, 0): 1,
-            (0, 1): 2,
-            (0, 2): 3,
-            (1, 0): 4,
-            (1, 1): 5,
-            (1, 2): 6
-        }
-        ```
+
+        .. code-block:: python
+
+            {
+                (0, 0): 1,
+                (0, 1): 2,
+                (0, 2): 3,
+                (1, 0): 4,
+                (1, 1): 5,
+                (1, 2): 6
+            }
+
         """
         d: dict[tuple[int, int], T] = {}
         for r in self._rowrange:
