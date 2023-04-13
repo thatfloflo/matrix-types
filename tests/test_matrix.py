@@ -1,6 +1,6 @@
 import pytest  # noqa: F401
 from matrix_types import Matrix
-from common import CommonInitTests, CommonGetterTests, CommonShapeTests
+from common import CommonInitTests, CommonGetterTests, CommonShapeTests, CommonRowOperationTests
 
 
 class TestInit(CommonInitTests):
@@ -13,7 +13,7 @@ class TestGetters(CommonGetterTests):
     MatrixClass = Matrix
 
 
-class TestMatrixShapes(CommonShapeTests):
+class TestShapes(CommonShapeTests):
 
     MatrixClass = Matrix
 
@@ -57,142 +57,60 @@ class TestMatrixShapes(CommonShapeTests):
         assert t is m
 
 
-class TestMatrixRowOperations:
+class TestRowOperations(CommonRowOperationTests):
 
-    def _make_2x3_test_matrix(self) -> Matrix:
-        """Make a 2x3 test matrix."""
-        return Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+    MatrixClass = Matrix
 
-    def test_insertrow_start(self):
-        """Insert a row at the beginning."""
+    def test_insertrow_insitu(self):
+        """Check that insertrow modifies and returns `self`."""
         m = self._make_2x3_test_matrix()
-        m.insertrow(0, [-1, -2, -3])
+        t = m.insertrow(0, [-1, -2, -3])
+        assert t is m
         assert m._shape == (3, 3)
         assert m.get(0, 0) == -1
-        assert m.get(0, 1) == -2
-        assert m.get(0, 2) == -3
 
-    def test_insertrow_middle(self):
-        """Insert a row at the middle."""
+    def test_prependrow_insitu(self):
+        """Check that prenedrow modifies and returns `self`."""
         m = self._make_2x3_test_matrix()
-        m.insertrow(1, [-1, -2, -3])
-        assert m._shape == (3, 3)
-        assert m.get(1, 0) == -1
-        assert m.get(1, 1) == -2
-        assert m.get(1, 2) == -3
-
-    def test_insertrow_end(self):
-        """Insert a row at the end."""
-        m = self._make_2x3_test_matrix()
-        m.insertrow(2, [-1, -2, -3])
-        assert m._shape == (3, 3)
-        assert m.get(2, 0) == -1
-        assert m.get(2, 1) == -2
-        assert m.get(2, 2) == -3
-        with pytest.raises(IndexError):
-            m.get(3, 0)
-
-    def test_insertrow_after_end(self):
-        """Inser a row with index much past number of rows."""
-        m = self._make_2x3_test_matrix()
-        m.insertrow(100, [-1, -2, -3])
-        assert m._shape == (3, 3)
-        assert m.get(2, 0) == -1
-        assert m.get(2, 1) == -2
-        assert m.get(2, 2) == -3
-        with pytest.raises(IndexError):
-            m.get(3, 0)
-
-    def test_prependrow(self):
-        """Prepend a row."""
-        m = self._make_2x3_test_matrix()
-        m.prependrow([-1, -2, -3])
+        t = m.prependrow([-1, -2, -3])
+        assert t is m
         assert m._shape == (3, 3)
         assert m.get(0, 0) == -1
-        assert m.get(0, 1) == -2
-        assert m.get(0, 2) == -3
 
-    def test_appendrow(self):
-        """Append a row."""
+    def test_appendrow_insitu(self):
+        """Check that appendrow modifies and returns `self`."""
         m = self._make_2x3_test_matrix()
-        m.appendrow([-1, -2, -3])
+        t = m.appendrow([-1, -2, -3])
+        assert t is m
         assert m._shape == (3, 3)
         assert m.get(2, 0) == -1
-        assert m.get(2, 1) == -2
-        assert m.get(2, 2) == -3
-        with pytest.raises(IndexError):
+        with pytest.raises(IndexError) as excinfo:
             m.get(3, 0)
+        assert "range" in str(excinfo.value)
 
-    def test_swaprows(self):
-        """Swap two rows."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        m.swaprows(1, 3)
+    def test_swaprow_insitu(self):
+        """Check that swaprow modifies and returns `self`."""
+        m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
+        t = m.swaprows(1, 3)
+        assert t is m
         assert m._shape == (4, 2)
         assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 1
-        assert m.get(1, 0) == 4
         assert m.get(1, 1) == 4
         assert m.get(2, 0) == 3
-        assert m.get(2, 1) == 3
-        assert m.get(3, 0) == 2
         assert m.get(3, 1) == 2
 
-    def test_swaprows_negative(self):
-        """Swap two rows using negative indices."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        m.swaprows(-3, -1)
-        assert m._shape == (4, 2)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 1
-        assert m.get(1, 0) == 4
-        assert m.get(1, 1) == 4
-        assert m.get(2, 0) == 3
-        assert m.get(2, 1) == 3
-        assert m.get(3, 0) == 2
-        assert m.get(3, 1) == 2
-
-    def test_swaprows_out_of_range(self):
-        """Attempt to swap rows out of range."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        with pytest.raises(IndexError):
-            m.swaprows(1, 4)
-
-    def test_delrow(self):
-        """Delete a row."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        m.delrow(1)
+    def test_delrow_insitu(self):
+        """Check that appendrow modifies and returns `self`."""
+        m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
+        t = m.delrow(1)
+        assert t is m
         assert m._shape == (3, 2)
         assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 1
         assert m.get(1, 0) == 3
-        assert m.get(1, 1) == 3
         assert m.get(2, 0) == 4
-        assert m.get(2, 1) == 4
-        with pytest.raises(IndexError):
+        with pytest.raises(IndexError) as excinfo:
             m.get(3, 0)
-
-    def test_delrow_negative(self):
-        """Delete a row using a negative index."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        m.delrow(-3)
-        assert m._shape == (3, 2)
-        assert m.get(0, 0) == 1
-        assert m.get(0, 1) == 1
-        assert m.get(1, 0) == 3
-        assert m.get(1, 1) == 3
-        assert m.get(2, 0) == 4
-        assert m.get(2, 1) == 4
-        with pytest.raises(IndexError):
-            m.get(3, 0)
-
-    def test_delrow_out_of_range(self):
-        """Attempt to delete a row out of range."""
-        m = Matrix([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        with pytest.raises(IndexError):
-            m.delrow(4)
-        with pytest.raises(IndexError):
-            m.delrow(-5)
-        assert m._shape == (4, 2)
+        assert "range" in str(excinfo.value)
 
 
 class TestMatrixColumnOperations:
