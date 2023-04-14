@@ -932,38 +932,6 @@ class MatrixABC(ABC, Generic[T]):
         """
         return copyfunc(self)
 
-    def flatten(self, *, by: RowColT = "row") -> list[T]:
-        """Returns a flat list of the matrix's values.
-
-        By default, the returned list will be sequenced row by row.
-        For example, the matrix::
-                0  1  2
-              ┌         ┐
-            0 │ 1  2  3 │
-            1 │ 4  5  6 │
-              └         ┘
-
-        will be returned as the list::
-
-            [1, 2, 3, 4, 5, 6]
-
-        This behaviour can be modified by passing the literal `"column"` as the
-        keyword-only argument *by*, such that :code:`m.flatten(by="column")`
-        would return::
-
-            [1, 4, 2, 5, 3, 6]
-
-        :param by: The direction in which the matrix values should be
-            serialised into a flat sequence, row-wise or column-wise.
-        :returns: A list with the matrix's values.
-        """
-        if by == "row":
-            return list(chain(*self._data))
-        elif by == "col":
-            transposed = (list(row) for row in zip(*self._data, strict=True))
-            return list(chain(*transposed))
-        raise TypeError("Argument 'by' must be literal 'row' or 'col'")
-
     def aslist(self, *, by: RowColT = "row") -> list[list[T]]:
         """Returns the matrix data as a list of lists.
 
@@ -1026,6 +994,97 @@ class MatrixABC(ABC, Generic[T]):
         """
         return {(r, c): self._data[r][c] for r in self._rowrange for c in self._colrange}
 
+    def keys(self, *, by: RowColT = "row") -> list[tuple[int, int]]:
+        """Returns a list of keys for all cells in the matrix.
+
+        The list contains tuples with the coordinates in the form
+        :code:`(row, col)`. These are sorted by row first if *by* is set to
+        :code`"row"` (the default), and they are sorted by column first if
+        *by* is set to :code:`"col"`.
+
+        :param by: Whether to sort the keys row-wise or column-wise.
+        :returns: A list of tuples with coordinates for each cell, sorted as
+            indicated by the *by* argument.
+        """
+        if by == "row":
+            return [(r, c) for r in self._rowrange for c in self._colrange]
+        elif by == "col":
+            return [(r, c) for c in self._colrange for r in self._rowrange]
+        raise TypeError("Argument 'by' must be literal 'row' or 'col'")
+
+    def values(self, *, by: RowColT = "row") -> list[T]:
+        """Returns a flat list of the matrix's values.
+
+        By default, the returned list will be sequenced row by row.
+        For example, the matrix::
+                0  1  2
+              ┌         ┐
+            0 │ 1  2  3 │
+            1 │ 4  5  6 │
+              └         ┘
+
+        will be returned as the list::
+
+            [1, 2, 3, 4, 5, 6]
+
+        This behaviour can be modified by passing the literal `"column"` as the
+        keyword-only argument *by*, such that :code:`m.values(by="column")`
+        would return::
+
+            [1, 4, 2, 5, 3, 6]
+
+        :param by: The direction in which the matrix values should be
+            serialised into a flat sequence, row-wise or column-wise.
+        :returns: A list with the matrix's values.
+        """
+        if by == "row":
+            return list(chain(*self._data))
+        elif by == "col":
+            transposed = (list(row) for row in zip(*self._data, strict=True))
+            return list(chain(*transposed))
+        raise TypeError("Argument 'by' must be literal 'row' or 'col'")
+
+    def items(self, *, by: RowColT = "row") -> list[T]:
+        """Returns a list of key--value pairs for all cells in the matrix.
+
+        Each item in the returned list is a tuple of the form
+        :code:`((row, col), value)`.
+
+        This is useful for iteration over a matrix where the row and column
+        indices should be kept track of. For example, if the row and column
+        index don't need to be unpacked ::
+
+            >>> m = Matrix([[1, 2], [3, 4]], default=0)
+            >>> for key, value in m.items():
+            ...     print(f"{key}:, {value}")
+            ...
+            (0, 0):, 1
+            (0, 1):, 2
+            (1, 0):, 3
+            (1, 1):, 4
+
+        If the row and key values should be unpacked this can be achieved by
+        further tuple unpacking ::
+
+            >>> for (row, col), val in m.items():
+            ...     print(f"({row}, {col}): {val}")
+            ...
+            (0, 0): 1
+            (0, 1): 2
+            (1, 0): 3
+            (1, 1): 4
+
+        :param by: The direction in which the matrix values should be
+            serialised into a flat sequence, row-wise or column-wise.
+        :returns: A list with pairs of the matrix's keys and corresponding
+            values.
+        """
+        if by == "row":
+            return [((r, c), self._data[r][c]) for r in self._rowrange for c in self._colrange]
+        elif by == "col":
+            return [((r, c), self._data[r][c]) for c in self._colrange for r in self._rowrange]
+        raise TypeError("Argument 'by' must be literal 'row' or 'col'")
+
     # DATA GETTERS AND SETTERS
 
     def submatrix(self, rows: IndexT, cols: IndexT) -> Self:
@@ -1065,8 +1124,19 @@ class MatrixABC(ABC, Generic[T]):
     ) -> None:
         raise NotImplementedError()
 
+    @overload
+    def get(self, index: tuple[IndexT, IndexT]) -> T | Self:
+        ...
+
+    @overload
     def get(self, row: IndexT, col: IndexT) -> T | Self:
+        ...
+
+    def get(self, row: IndexT, col: IndexT | None = None) -> T | Self:
         """Return an item or submatrix based on row and colum indices.
+
+        Can be invoked as either :code:`get((row, col))` or
+        :code:`get(row, col)`.
 
         Returns the value of a cell if both *rows* and *cols* are integers
         which together reference a unique cell. Returns a submatrix if either
@@ -1081,6 +1151,8 @@ class MatrixABC(ABC, Generic[T]):
             integers refering to a single cell, otherwise a submatrix covering
             the are selected by *row* and *col*.
         """
+        if col is None and isinstance(row, tuple) and len(row) == 2:
+            (row, col) = row
         if not isinstance(row, (slice, int, tuple)) or not isinstance(col, (slice, int, tuple)):
             raise TypeError(
                 "Matrix indices must be tuples of type (int | slice | tuple[int, ...], int | slice "
@@ -1099,7 +1171,7 @@ class MatrixABC(ABC, Generic[T]):
         return self.get(key[0], key[1])
 
     def __iter__(self):
-        raise NotImplementedError()
+        return iter(self.keys())
 
     # DUNDER METHODS
 

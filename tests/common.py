@@ -677,28 +677,28 @@ class CommonDataAccessTests(CommonTestBase):
             t.get(1, 0)
         assert m._shape == (3, 3)
 
-    def test_flatten_by_default(self):
+    def test_values_by_default(self):
         """Test flattening Matrix data to list with by=default."""
         m = self._make_3x3_test_matrix()
-        t = m.flatten()
+        t = m.values()
         assert isinstance(t, list)
         assert all(isinstance(x, int) for x in t)
         assert len(t) == m._shape[0] * m._shape[1]
         assert t == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    def test_flatten_by_row(self):
+    def test_values_by_row(self):
         """Test flattening Matrix data to list with by="row"."""
         m = self._make_3x3_test_matrix()
-        t = m.flatten(by="row")
+        t = m.values(by="row")
         assert isinstance(t, list)
         assert all(isinstance(x, int) for x in t)
         assert len(t) == m._shape[0] * m._shape[1]
         assert t == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    def test_flatten_by_column(self):
+    def test_values_by_column(self):
         """Test flattening Matrix data to list with by="col"."""
         m = self._make_3x3_test_matrix()
-        t = m.flatten(by="col")
+        t = m.values(by="col")
         assert isinstance(t, list)
         assert all(isinstance(x, int) for x in t)
         assert len(t) == m._shape[0] * m._shape[1]
@@ -763,18 +763,18 @@ class CommonOperationTests(CommonTestBase):
         m = self._make_3x3_test_matrix()
         o = self._make_3x3_test_matrix()
         t = m.matadd(o)
-        assert t.flatten() == [2, 4, 6, 8, 10, 12, 14, 16, 18]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert t.values() == [2, 4, 6, 8, 10, 12, 14, 16, 18]
+        assert m.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test_matsub(self):
         """Test regular matrix subtraction."""
         m = self._make_3x3_test_matrix()
         o = self._make_3x3_test_matrix()
         t = m.matsub(o)
-        assert t.flatten() == [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert t.values() == [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        assert m.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test_matmul(self):
         """Test regular matrix multiplication."""
@@ -782,14 +782,14 @@ class CommonOperationTests(CommonTestBase):
         o = self._make_3x3_test_matrix()
         t = m.matmul(o)
         assert t.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert m.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
         incompatible = Matrix([], shape=(2, 3), default=0)
         with pytest.raises(ValueError):
             m.matmul(incompatible)
         with pytest.raises(ValueError):
             incompatible.matmul(m)
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert m.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test_scaladd(self):
         """Test regular scalar addition."""
@@ -855,7 +855,7 @@ class CommonDunderTests(CommonTestBase):
         t = eval(f"{m!r}")
         assert isinstance(t, self.MatrixClass)
         assert t._shape == (3, 3)
-        assert t.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert t.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test__eq__(self):
         """Test == / __eq__."""
@@ -1021,12 +1021,12 @@ class CommonDunderTests(CommonTestBase):
         o = self._make_3x3_test_matrix()
         t = m @ o
         assert t.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert m.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
         incompatible = Matrix([], shape=(2, 3), default=2)
         with pytest.raises(ValueError):
             m @ incompatible
         with pytest.raises(ValueError):
             incompatible @ m
-        assert m.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert m.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
         assert incompatible.aslist() == [[2, 2, 2], [2, 2, 2]]

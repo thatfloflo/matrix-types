@@ -139,16 +139,16 @@ class TestOperations(CommonOperationTests):
         m = self._make_3x3_test_matrix()
         o = self._make_3x3_test_matrix()
         m.imatadd(o)
-        assert m.flatten() == [2, 4, 6, 8, 10, 12, 14, 16, 18]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert m.values() == [2, 4, 6, 8, 10, 12, 14, 16, 18]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test_imatsub(self):
         """Test in-situ matrix subtraction."""
         m = self._make_3x3_test_matrix()
         o = self._make_3x3_test_matrix()
         m.imatsub(o)
-        assert m.flatten() == [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert m.values() == [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def test_imatmul(self):
         """Test in-situ matrix multiplication."""
@@ -156,7 +156,7 @@ class TestOperations(CommonOperationTests):
         o = self._make_3x3_test_matrix()
         m.imatmul(o)
         assert m.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
         incompatible = Matrix([], shape=(2, 3), default=0)
         with pytest.raises(ValueError):
             m.imatmul(incompatible)
@@ -306,7 +306,7 @@ class TestDunders(CommonDunderTests):
         o = self._make_3x3_test_matrix()
         m @= o
         assert m.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
-        assert o.flatten() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        assert o.values() == [1, 2, 3, 4, 5, 6, 7, 8, 9]
         incompatible = Matrix([], shape=(2, 3), default=2)
         with pytest.raises(ValueError):
             m @= incompatible
