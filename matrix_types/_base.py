@@ -1024,11 +1024,7 @@ class MatrixABC(ABC, Generic[T]):
         :returns: A dictionary with coordinates as keys and cell values as
             values.
         """
-        d: dict[tuple[int, int], T] = {}
-        for r in self._rowrange:
-            for c in self._colrange:
-                d[r, c] = self._data[r][c]
-        return d
+        return {(r, c): self._data[r][c] for r in self._rowrange for c in self._colrange}
 
     # DATA GETTERS AND SETTERS
 
