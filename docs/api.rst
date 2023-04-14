@@ -10,6 +10,8 @@ API Documentation
     :recursive:
     :nosignatures:
 
+    MatrixABC
     Matrix
     FrozenMatrix
     MatrixT
+    MISSING

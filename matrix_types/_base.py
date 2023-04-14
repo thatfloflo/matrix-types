@@ -301,29 +301,28 @@ class MatrixABC(ABC, Generic[T]):
     def transpose(self) -> Self:
         """Transposes the rows and columns of the matrix.
 
-        This has the effect of turning a matrix such as
+        This has the effect of turning a matrix such as::
 
-        .. code-block::
+                0  1  2
+              ┌         ┐
+            0 │ 1  2  3 │
+            1 │ 4  5  6 │
+              └         ┘
 
-                ┌         ┐
-                │ 1  2  3 │
-                │ 4  5  6 │
-                └         ┘
+        into the matrix::
 
-        into the matrix
-
-        .. code-block::
-
-            ┌      ┐
-            │ 1  4 │
-            │ 2  5 │
-            │ 3  6 │
-            └      ┘
+                0  1
+              ┌      ┐
+            0 │ 1  4 │
+            1 │ 2  5 │
+            2 │ 3  6 │
+              └      ┘
 
         Modifies the matrix in-situ if it is mutable, otherwise returns a
         transposed copy of the matrix.
 
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         raise NotImplementedError()
 
@@ -408,17 +407,20 @@ class MatrixABC(ABC, Generic[T]):
         """Flips a matrix vertically or horizontally.
 
         Effectively reverses the order of the matrix's rows or columns.
+
         Whether the flipping is applied to the rows or columns is specified
-        by the keyword-only argument *by*. The default is *row*, which flips
-        the matrix vertically.
+        by the keyword-only argument *by*. The default is :code:`"row"`,
+        which flips the matrix vertically.
 
         :code:`m.flip()` and :code:`m.flip(by="row")` are equivalent to
         :code:`m.flipv()`.
+
         :code:`m.flip(by="column")` is equivalent to :code:`m.fliph()`.
 
-        :param by: Whether to flop rowwise or columnwise, must be one of the
+        :param by: Whether to flop row-wise or column-wise, must be one of the
             literal strings :code:`"row"` (the default) or :code:`"col"`.
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         raise NotImplementedError()
 
@@ -427,28 +429,27 @@ class MatrixABC(ABC, Generic[T]):
 
         This effectively reverses the order of the columns of the matrix.
 
-        This has the effect of turning a matrix such as
+        This has the effect of turning a matrix such as::
 
-        .. code-block::
+                0  1  2
+              ┌         ┐
+            0 │ 1  2  3 │
+            1 │ 4  5  6 │
+              └         ┘
 
-            ┌         ┐
-            │ 1  2  3 │
-            │ 4  5  6 │
-            └         ┘
+        into the matrix::
 
-        into the matrix
-
-        .. code-block::
-
-            ┌         ┐
-            │ 3  2  1 │
-            │ 6  5  4 │
-            └         ┘
+                0  1  2
+              ┌         ┐
+            0 │ 3  2  1 │
+            1 │ 6  5  4 │
+              └         ┘
 
         Modifies the matrix in-situ if the matrix is mutable, otherwise returns
         a copy of the matrix with the order of columns reversed.
 
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         return self.flip(by="col")
 
@@ -457,30 +458,29 @@ class MatrixABC(ABC, Generic[T]):
 
         This effectively reverses the order of the rows of the matrix.
 
-        This has the effect of turning a matrix such as
+        This has the effect of turning a matrix such as::
 
-        .. code-block::
+                0  1  2
+              ┌         ┐
+            0 │ 1  2  3 │
+            1 │ 4  5  6 │
+            2 │ 7  8  9 │
+              └         ┘
 
-            ┌         ┐
-            │ 1  2  3 │
-            │ 4  5  6 │
-            │ 7  8  9 │
-            └         ┘
+        into the matrix::
 
-        into the matrix
-
-        .. code-block::
-
-            ┌         ┐
-            │ 7  8  9 │
-            │ 4  5  6 │
-            │ 1  2  3 │
-            └         ┘
+                0  1  2
+              ┌         ┐
+            0 │ 7  8  9 │
+            1 │ 4  5  6 │
+            2 │ 1  2  3 │
+              └         ┘
 
         Modifies the matrix in-situ if the matrix is mutable, otherwise returns
         a copy of the matrix with the order of rows reversed.
 
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         return self.flip(by="row")
 
@@ -502,7 +502,7 @@ class MatrixABC(ABC, Generic[T]):
         """Inserts a row with values *data* before *index*.
 
         *data* must be a sequence with length at least matching the number of
-        rows in the matrix. Unused values will be ignored.
+        columns in the matrix. Unused values will be ignored.
 
         Modifies the matrix in-situ if the matrix is mutable, otherwise returns
         an expanded copy of the matrix.
@@ -532,7 +532,7 @@ class MatrixABC(ABC, Generic[T]):
         """Inserts a column with values *data* before *index*.
 
         *data* must be a sequence with length at least matching the number of
-        columns in the matrix. Unused values will be ignored.
+        rows in the matrix. Unused values will be ignored.
 
         Modifies the matrix in-situ if the matrix is mutable, otherwise returns
         an expanded copy of the matrix.
@@ -546,39 +546,41 @@ class MatrixABC(ABC, Generic[T]):
     def appendrow(self, data: Sequence[T]) -> Self:
         """Appends a row with values *data* at the bottom of the matrix.
 
-        This is equivalent to `m.insertrow(len(m), data)`.
+        This is equivalent to :code:`m.insertrow(len(m), data)`.
 
         *data* must be a sequence with length at least matching the number of
-        rows in the matrix. Unused values will be ignored.
+        columns in the matrix. Unused values will be ignored.
 
-        Modifies the matrix in-situ if the matrix is mutable, otherwise returns
-        an expanded copy of the matrix.
+        Modifies the matrix in-situ and returns *self* if the matrix is
+        mutable, otherwise returns an expanded copy of the matrix.
 
         :param data: The data to be inserted into the new row.
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         return self.insertrow(self._shape[0], data)
 
     def appendcol(self, data: Sequence[T]) -> Self:
         """Appends a column with values *data* to the right of the matrix.
 
-        This is equivalent to `m.insertcol(len(m), data)`.
+        This is equivalent to :code:`m.insertcol(len(m), data)`.
 
         *data* must be a sequence with length at least matching the number of
-        columns in the matrix. Unused values will be ignored.
+        rows in the matrix. Unused values will be ignored.
 
-        Modifies the matrix in-situ if the matrix is mutable, otherwise returns
-        an expanded copy of the matrix.
+        Modifies the matrix in-situ and returns *self* if the matrix is
+        mutable, otherwise returns an expanded copy of the matrix.
 
         :param data: The data to be inserted into the new column.
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         return self.insertcol(self._shape[1], data)
 
     def prependrow(self, data: Sequence[T]) -> Self:
         """Prepends a row with values *data* at the bottom of the matrix.
 
-        This is equivalent to `m.insertrow(0, data)`.
+        This is equivalent to :code:`m.insertrow(0, data)`.
 
         *data* must be a sequence with length at least matching the number of
         rows in the matrix. Unused values will be ignored.
@@ -594,7 +596,7 @@ class MatrixABC(ABC, Generic[T]):
     def prependcol(self, data: Sequence[T]) -> Self:
         """Prepends a column with values *data* to the right of the matrix.
 
-        This is equivalent to `m.insertcol(0, data)`.
+        This is equivalent to :code:`m.insertcol(0, data)`.
 
         *data* must be a sequence with length at least matching the number of
         columns in the matrix. Unused values will be ignored.
@@ -607,45 +609,49 @@ class MatrixABC(ABC, Generic[T]):
         """
         return self.insertcol(0, data)
 
-    def _delrow(self, index: int) -> None:
-        """Deletes a row from the internal data."""
+    def _removerow(self, index: int) -> None:
+        """Removes a row from the internal data."""
         self._check_rowindex(index)
         del self._data[index]
         self._shape = (self._shape[0] - 1, self._shape[1])
         self._calculate_helpers()
 
     @abstractmethod
-    def delrow(self, index: int) -> Self:
-        """Delete the row at *index*.
+    def removerow(self, index: int) -> Self:
+        """Removes the row at *index*.
 
         .. caution::
-            The row is *deleted*, i.e. *removed completely* from the Matrix, and
-            the Matrix's shape will be altered. Calling this function *does not*
-            merely reset the values of items in the targeted row to their default!
+            The row is *removed completely* from the matrix, and
+            the matrix's shape will be altered. Calling this function
+            *does not* merely reset the values of items in the targeted
+            row to their default!
 
-        :param index: The index of the row to be deleted.
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :param index: The index of the row to be removed.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         raise NotImplementedError()
 
-    def _delcol(self, index: int) -> None:
-        """Deletes a column from the internal data."""
+    def _removecol(self, index: int) -> None:
+        """Removes a column from the internal data."""
         for row in self._rowrange:
             del self._data[row][index]
         self._shape = (self._shape[0], self._shape[1] - 1)
         self._calculate_helpers()
 
     @abstractmethod
-    def delcol(self, index: int) -> Self:
-        """Delete the column at *index*.
+    def removecol(self, index: int) -> Self:
+        """Remove the column at *index*.
 
         .. caution::
-            The column is *deleted*, i.e. *removed completely* from the Matrix, and
-            the Matrix's shape will be altered. Calling this function *does not*
-            merely reset the values of items in the targeted column to their default!
+            The column is *removed completely* from the matrix, and
+            the matrix's shape will be altered. Calling this function
+            *does not* merely reset the values of items in the targeted
+            column to their default!
 
-        :param index: The index of the column to be deleted.
-        :returns: its own :class:`Matrix` instance or a copy of the :class:`FrozenMatrix` instance.
+        :param index: The index of the column to be removed.
+        :returns: its own :class:`Matrix` instance if mutable,
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         raise NotImplementedError()
 
@@ -841,11 +847,11 @@ class MatrixABC(ABC, Generic[T]):
     ) -> Self | MatrixABC[V]:
         """Applies *func* to each cell in the matrix.
 
-        Any additional args or kwargs passed after *func* will be passed
-        as parameters to *func*.
+        Any additional *args* or *kwargs* passed after *func* will be passed
+        as arguments to *func*.
 
         The return value of *func* will be ignored. To mutate the values
-        of each cell in-situ based on the return value, use :func:`Matrix.map()`
+        of each cell in-situ based on the return value, use :func:`map()`
         instead.
 
         :Example:
@@ -882,63 +888,74 @@ class MatrixABC(ABC, Generic[T]):
         """Applies *func* to each cell in the matrix and stores the return value
         of *func* as the new cell value.
 
-        Any additional args or kwargs passed after *func* will be passed
+        Any additional *args* or *kwargs* passed after *func* will be passed
         as parameters to *func*.
 
         This will mutate the values of each cell in-situ based on the return
         value of *func*. To apply *func* without affecting the values store
-        in the matrix, use :func:`Matrix.foreach()` instead.
-
-        Example:
-            ```
-            print(m)
-            # ┌         ┐
-            # │ 1  2  3 │
-            # │ 4  5  6 │
-            # └         ┘
-            print(m.map(lambda a: a**2))
-            # ┌            ┐
-            # │  1   4   9 │
-            # │ 16  25  36 │
-            # └            ┘
-            ```
+        in the matrix, use :func:`foreach()` instead.
 
         Returns the original matrix with *func* applied in-situ if the matrix
         is mutable, otherwise returns a copy of the matrix with *func* applied.
 
+        :Example:
+
+            >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+            >>> print(m)
+                0  1  2
+              ┌         ┐
+            0 │ 1  2  3 │
+            1 │ 4  5  6 │
+              └         ┘
+            >>> print(m.map(lambda a: a**2))
+                 0   1   2
+              ┌            ┐
+            0 │  1   4   9 │
+            1 │ 16  25  36 │
+              └            ┘
+
         :param func: A callable accepting at least one argument (namely the
             value of each cell as the matrix is being iterated over).
-        :returns: its own :class:`Matrix` instance or a copy of the
-            :class:`FrozenMatrix` instance.
+        :param args: Additional positional arguments to be passed to *func*.
+        :param kwargs: Additional keyword arguments to be passed to *func*.
+        :returns: its own :class:`Matrix` instance if mutable, 
+            a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         raise NotImplementedError()
 
     # DATA ACCESS MODALITIES
 
     def copy(self) -> Self:
+        """Returns a copy of the matrix object.
+
+        :returns: A copy of *self*.
+        """
         return copyfunc(self)
 
     def flatten(self, *, by: RowColT = "row") -> list[T]:
         """Returns a flat list of the matrix's values.
 
         By default, the returned list will be sequenced row by row.
-        For example, the matrix
-        ```
-        ┌         ┐
-        │ 1  2  3 │
-        │ 4  5  6 │
-        └         ┘
-        ```
-        will be returned as the list
-        ```
-        [1, 2, 3, 4, 5, 6]
-        ```
+        For example, the matrix::
+                0  1  2
+              ┌         ┐
+            0 │ 1  2  3 │
+            1 │ 4  5  6 │
+              └         ┘
+
+        will be returned as the list::
+
+            [1, 2, 3, 4, 5, 6]
+
         This behaviour can be modified by passing the literal `"column"` as the
-        keyword-only argument *by*, such that `m.flatten(by="column")` would
-        return
-        ```
-        [1, 4, 2, 5, 3, 6]
-        ```
+        keyword-only argument *by*, such that :code:`m.flatten(by="column")`
+        would return::
+
+            [1, 4, 2, 5, 3, 6]
+
+        :param by: The direction in which the matrix values should be
+            serialised into a flat sequence, row-wise or column-wise.
+        :returns: A list with the matrix's values.
         """
         if by == "row":
             return list(chain(*self._data))
@@ -950,24 +967,28 @@ class MatrixABC(ABC, Generic[T]):
     def aslist(self, *, by: RowColT = "row") -> list[list[T]]:
         """Returns the matrix data as a list of lists.
 
-        If *by* is `"row"` (the default), then the returned list of lists is in
-        the format rows[columns]. If *by* is `"col"` then the returned list is
-        in the format columns[rows].
+        If *by* is :code:`"row"` (the default), then the returned list of lists
+        is in the format *rows[columns]*. If *by* is :code:`"col"` then the
+        returned list is in the format *columns[rows]*.
 
-        For example, the matrix
-        ```
-        ┌         ┐
-        │ 1  2  3 │
-        │ 4  5  6 │
-        └         ┘
-        ```
-        will be returned as a list of the form
-        ```
-        [
-            [1, 2, 3],
-            [4, 5, 6]
-        ]
-        ```
+        For example, the matrix::
+
+                 0  1  2
+               ┌         ┐
+            0  │ 1  2  3 │
+            1  │ 4  5  6 │
+               └         ┘
+
+        will be returned as a list of the form::
+
+            [
+                [1, 2, 3],
+                [4, 5, 6]
+            ]
+
+        :param by: Specifies whether to build the list row-wise or column-wise.
+        :returns: A list containing one list for each row/column, depending on
+            the direction indicated by the *by* argument.
         """
         if by == "row":
             return [list(row) for row in self._data]  # Ensure shallow copy of rows
@@ -978,20 +999,18 @@ class MatrixABC(ABC, Generic[T]):
     def asdict(self) -> dict[tuple[int, int], T]:
         """Returns the matrix data as a dictionary with coordinates as key.
 
-        The returned dictionary's keys are tuples of the form `(row, column)`.
+        The returned dictionary's keys are tuples of the form
+        :code:`(row, column)`.
 
-        For example, the matrix
+        For example, the matrix::
 
-        .. code-block::
+                 0  1  2
+               ┌         ┐
+            0  │ 1  2  3 │
+            1  │ 4  5  6 │
+               └         ┘
 
-            ┌         ┐
-            │ 1  2  3 │
-            │ 4  5  6 │
-            └         ┘
-
-        will be returned as a dict of the form
-
-        .. code-block:: python
+        will be returned as a dict of the form::
 
             {
                 (0, 0): 1,
@@ -1002,6 +1021,8 @@ class MatrixABC(ABC, Generic[T]):
                 (1, 2): 6
             }
 
+        :returns: A dictionary with coordinates as keys and cell values as
+            values.
         """
         d: dict[tuple[int, int], T] = {}
         for r in self._rowrange:
@@ -1053,7 +1074,16 @@ class MatrixABC(ABC, Generic[T]):
 
         Returns the value of a cell if both *rows* and *cols* are integers
         which together reference a unique cell. Returns a submatrix if either
-        *rows*, *cols* or both are slice objects.
+        *rows*, *cols* or both are slice objects or tuples of integers with
+        several row/column indices.
+
+        :param row: The row index or row indices (as a tuple or slice) of the
+            row(s) to be returned.
+        :param col: The column index or column indices (as a tuple or slice) of
+            the column(s) to be returned.
+        :returns: The value of the matrix cell if both *row* and *col* are
+            integers refering to a single cell, otherwise a submatrix covering
+            the are selected by *row* and *col*.
         """
         if not isinstance(row, (slice, int, tuple)) or not isinstance(col, (slice, int, tuple)):
             raise TypeError(

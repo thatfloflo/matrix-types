@@ -114,10 +114,10 @@ class TestRowOperations(CommonRowOperationTests):
         assert m.get(2, 0) == 3
         assert m.get(3, 1) == 4
 
-    def test_delrow_immutability(self):
-        """Check that appendrow doesn't modify or return `self`."""
+    def test_removerow_immutability(self):
+        """Check that removerow doesn't modify or return `self`."""
         m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        t = m.delrow(1)
+        t = m.removerow(1)
         assert t is not m
         assert t._shape == (3, 2)
         assert m._shape == (4, 2)

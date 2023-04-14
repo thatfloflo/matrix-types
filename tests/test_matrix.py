@@ -104,10 +104,10 @@ class TestRowOperations(CommonRowOperationTests):
         assert m.get(2, 0) == 3
         assert m.get(3, 1) == 2
 
-    def test_delrow_insitu(self):
+    def test_removerow_insitu(self):
         """Check that appendrow modifies and returns `self`."""
         m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        t = m.delrow(1)
+        t = m.removerow(1)
         assert t is m
         assert m._shape == (3, 2)
         assert m.get(0, 0) == 1

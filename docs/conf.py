@@ -51,7 +51,7 @@ extensions = [
     'sphinx_toolbox.more_autodoc.genericalias',
     'sphinx_toolbox.more_autodoc.regex',
     # 'sphinx_toolbox.more_autodoc.sourcelink',
-    # 'sphinx_toolbox.more_autodoc.typehints',
+    'sphinx_toolbox.more_autodoc.typehints',
     'sphinx_toolbox.more_autodoc.typevars',
     'sphinx_toolbox.more_autodoc.variables',
     'sphinx_toolbox.tweaks.param_dash',
@@ -64,17 +64,19 @@ github_repository = 'matrix-types'
 autoapi_dirs = ['../matrix_types']
 autodoc_default_options = {
     'members': True,
-    'private-members': True,
+    'private-members': False,
     'inherited-members': True,
     'undoc-members': True,
-    # 'exclude-members': ['with_traceback'],
-    'show-inheritance': True,
-    'ignore-module-all': True,
+    'show-inheritance': False,
+    'ignore-module-all': False,
+    'class-doc-from': 'class',
 }
 autodoc_class_signature = 'separated'
+autoclass_content = 'class'
 autodoc_member_order = 'groupwise'
 autodoc_typehints = 'both'
 autodoc_typehints_format = 'short'
+autodoc_type_aliases = {'MatrixT': 'matrix_types.MatrixT'}
 autodoc_preserve_defaults = True
 typehints_defaults = 'comma'
 autodoc_show_sourcelink = True

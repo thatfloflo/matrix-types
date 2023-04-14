@@ -467,10 +467,10 @@ class CommonRowOperationTests(CommonTestBase):
             m.swaprows(1, 4)
         assert "range" in str(excinfo.value)
 
-    def test_delrow(self):
-        """Delete a row."""
+    def test_removerow(self):
+        """Remove a row."""
         m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        t = m.delrow(1)
+        t = m.removerow(1)
         assert t._shape == (3, 2)
         assert t.get(0, 0) == 1
         assert t.get(0, 1) == 1
@@ -482,10 +482,10 @@ class CommonRowOperationTests(CommonTestBase):
             t.get(3, 0)
         assert "range" in str(excinfo.value)
 
-    def test_delrow_negative(self):
+    def test_removerow_negative(self):
         """Delete a row using a negative index."""
         m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
-        t = m.delrow(-3)
+        t = m.removerow(-3)
         assert t._shape == (3, 2)
         assert t.get(0, 0) == 1
         assert t.get(0, 1) == 1
@@ -497,14 +497,14 @@ class CommonRowOperationTests(CommonTestBase):
             t.get(3, 0)
         assert "range" in str(excinfo.value)
 
-    def test_delrow_out_of_range(self):
+    def test_removerow_out_of_range(self):
         """Attempt to delete a row out of range."""
         m = self.MatrixClass([[1, 1], [2, 2], [3, 3], [4, 4]], default=0)
         with pytest.raises(IndexError) as excinfo:
-            m.delrow(4)
+            m.removerow(4)
         assert "range" in str(excinfo.value)
         with pytest.raises(IndexError) as excinfo:
-            m.delrow(-5)
+            m.removerow(-5)
         assert "range" in str(excinfo.value)
         assert m._shape == (4, 2)
 
@@ -611,10 +611,10 @@ class CommonColumnOperationTests(CommonTestBase):
         with pytest.raises(IndexError):
             m.swapcols(1, 4)
 
-    def test_delcol(self):
-        """Delete a column."""
+    def test_removecol(self):
+        """Remove a column."""
         m = self.MatrixClass([[1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        t = m.delcol(1)
+        t = m.removecol(1)
         assert t._shape == (2, 3)
         assert t.get(0, 0) == 1
         assert t.get(0, 1) == 3
@@ -625,10 +625,10 @@ class CommonColumnOperationTests(CommonTestBase):
         with pytest.raises(IndexError):
             t.get(0, 3)
 
-    def test_delcol_negative(self):
-        """Delete a column using a negative index."""
+    def test_removecol_negative(self):
+        """Remove a column using a negative index."""
         m = self.MatrixClass([[1, 2, 3, 4], [1, 2, 3, 4]], default=0)
-        t = m.delcol(-3)
+        t = m.removecol(-3)
         assert t._shape == (2, 3)
         assert t.get(0, 0) == 1
         assert t.get(0, 1) == 3
@@ -639,13 +639,13 @@ class CommonColumnOperationTests(CommonTestBase):
         with pytest.raises(IndexError):
             t.get(0, 3)
 
-    def test_delcol_out_of_range(self):
+    def test_removecol_out_of_range(self):
         """Attempt to delete a column out of range."""
         m = self.MatrixClass([[1, 2, 3, 4], [1, 2, 3, 4]], default=0)
         with pytest.raises(IndexError):
-            m.delcol(4)
+            m.removecol(4)
         with pytest.raises(IndexError):
-            m.delcol(-5)
+            m.removecol(-5)
         assert m._shape == (2, 4)
 
 

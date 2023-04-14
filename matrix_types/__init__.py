@@ -12,13 +12,22 @@ value distinct from options such as `0`, `None`, etc. A generic type alias
 :class:`Matrix` and :class:`FrozenMatrix` would be acceptable.
 """
 from ._types import MISSING
+from ._base import MatrixABC
 from ._matrix import Matrix
 from ._frozen_matrix import FrozenMatrix
 from typing import TypeAlias
 
-MatrixT: TypeAlias = Matrix | FrozenMatrix
+MatrixT: TypeAlias = Matrix | FrozenMatrix | MatrixABC
+"""Type alias for matrix types in `matrix_types`.
+
+This type alias can be used for type annotations whenever any of the matrix
+types (e.g. :class:`Matrix`, :class:`FrozenMatrix`) would acceptable.
+
+This includes potentially user-defined subclasses based off :class:`MatrixABC`.
+"""
 
 __all__ = [
+    "MatrixABC",
     "Matrix",
     "FrozenMatrix",
     "MatrixT",

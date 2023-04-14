@@ -7,7 +7,30 @@ from ._types import T, V, RowColT
 
 
 class FrozenMatrix(MatrixABC[T]):
-    """Abstract base class for 2-dimensional matrix types."""
+    """Immutable 2-dimensional Matrix type.
+
+    Behaves almost identically to the mutable :class:`Matrix` type, but where
+    :class:`Matrix` instances are modified in place, it instead returns an
+    immutable copy of :class:`FrozenMatrix` with the function applied instead.
+
+    :class:`FrozenMatrix` also misses all the 'in-situ' methods of
+    :class:`Matrix`, that is operations typically prefixed with :code:`i` such
+    as :func:`Matrix.iscaladd()` and :func:`Matrix.imatmul()`, as well as their
+    operator equivalents (e.g. :code:`+=` and :code:`@=`).
+
+    .. important::
+
+        It is important to note that :class:`FrozenMatrix` is *imperfectly
+        immutable*.
+
+        While :class:`FrozenMatrix` does not provide any public functionality
+        that would alter a specific instance of :class:`FrozenMatrix`, and all
+        operations affecting values or shape result in copies, once
+        instantiated, Python itself does not prevent user code from modifying
+        the internals of an object (e.g. by accessing and modifying the
+        internal data structure directly). This means that immutability with
+        :class:`FrozenMatrix` can be assumed, but not guaranteed.
+    """
 
     # SHAPE MANIPULATION
 
@@ -36,14 +59,14 @@ class FrozenMatrix(MatrixABC[T]):
         new._insertcol(index, data)
         return new
 
-    def delrow(self, index: int) -> Self:
+    def removerow(self, index: int) -> Self:
         new = self.copy()
-        new._delrow(index)
+        new._removerow(index)
         return new
 
-    def delcol(self, index: int) -> Self:
+    def removecol(self, index: int) -> Self:
         new = self.copy()
-        new._delcol(index)
+        new._removecol(index)
         return new
 
     def swaprows(self, a_index: int, b_index: int) -> Self:
