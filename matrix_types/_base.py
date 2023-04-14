@@ -954,6 +954,11 @@ class MatrixABC(ABC, Generic[T]):
                 [4, 5, 6]
             ]
 
+        Note that this is different from invoking :code:`list(m)` on a matrix,
+        which does not return a list of list with the matrix's values, but
+        rather a list of :code:`(row, col)` index pairs for each cell,
+        equivalent to calling :func:`keys()` on a matrix object.
+
         :param by: Specifies whether to build the list row-wise or column-wise.
         :returns: A list containing one list for each row/column, depending on
             the direction indicated by the *by* argument.
@@ -999,7 +1004,7 @@ class MatrixABC(ABC, Generic[T]):
 
         The list contains tuples with the coordinates in the form
         :code:`(row, col)`. These are sorted by row first if *by* is set to
-        :code`"row"` (the default), and they are sorted by column first if
+        :code:`"row"` (the default), and they are sorted by column first if
         *by* is set to :code:`"col"`.
 
         :param by: Whether to sort the keys row-wise or column-wise.
@@ -1056,23 +1061,23 @@ class MatrixABC(ABC, Generic[T]):
 
             >>> m = Matrix([[1, 2], [3, 4]], default=0)
             >>> for key, value in m.items():
-            ...     print(f"{key}:, {value}")
-            ...
-            (0, 0):, 1
-            (0, 1):, 2
-            (1, 0):, 3
-            (1, 1):, 4
-
-        If the row and key values should be unpacked this can be achieved by
-        further tuple unpacking ::
-
-            >>> for (row, col), val in m.items():
-            ...     print(f"({row}, {col}): {val}")
+            ...     print(f"{key}: {value}")
             ...
             (0, 0): 1
             (0, 1): 2
             (1, 0): 3
             (1, 1): 4
+
+        If the row and key values should be unpacked this can be achieved by
+        further tuple unpacking ::
+
+            >>> for (row, col), val in m.items():
+            ...     print(f"{row}, {col}: {val}")
+            ...
+            0, 0: 1
+            0, 1: 2
+            1, 0: 3
+            1, 1: 4
 
         :param by: The direction in which the matrix values should be
             serialised into a flat sequence, row-wise or column-wise.
