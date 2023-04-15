@@ -113,5 +113,5 @@ html_static_path = ['_static']
 
 
 rst_epilog = f"""
-.. |project| replace:: {project}
+.. |project| replace:: *{project}*
 """

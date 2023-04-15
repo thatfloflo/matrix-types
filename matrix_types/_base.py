@@ -116,7 +116,7 @@ class MatrixABC(ABC, Generic[T]):
         # Check types for data, shape and default
         if not isinstance(data, (MatrixABC, Sequence)):
             raise TypeError(
-                f"Argument 'data' must be of type Matrix or Sequence, {type(data)} given"
+                f"Argument 'data' must be of type Matrix or Sequence, not {type(data)}"
             )
         if (not isinstance(shape, tuple)
                 or len(shape) != 2
@@ -125,7 +125,7 @@ class MatrixABC(ABC, Generic[T]):
             _desc = (f"{type(shape)} of length {len(shape)}"
                      if isinstance(shape, Sized)
                      else type(shape))
-            raise TypeError(f"Argument 'shape' must be of type tuple[int, int], {_desc} given")
+            raise TypeError(f"Argument 'shape' must be of type tuple[int, int], not {_desc}")
         # Make sure we do not have negative shape values
         self._check_shape(shape)
         # Initialise matrix
@@ -197,9 +197,9 @@ class MatrixABC(ABC, Generic[T]):
     def _check_shape(self, shape: tuple[int, int]):
         """Checks whether a shape tuple is valid in terms of values."""
         if shape[0] < 0:
-            raise ValueError("Row count cannot be negative.")
+            raise ValueError("Row count cannot be negative")
         if shape[1] < 0:
-            raise ValueError("Column count cannot be negative.")
+            raise ValueError("Column count cannot be negative")
 
     def _check_rowindex(self, row: IndexT) -> None:
         """Checks whether a row index is in range or out of range.
@@ -209,15 +209,15 @@ class MatrixABC(ABC, Generic[T]):
         """
         if not isinstance(row, (int, tuple, slice)):
             raise TypeError(
-                f"Row index must be of type int | slice | tuple[int, ...], {type(row)!r} given."
+                f"Row index must be of type int | slice | tuple[int, ...], not {type(row)!r}"
             )
         if isinstance(row, int) and (row == self._shape[0] or abs(row) > self._shape[0]):
             raise IndexError("Row index out of range")
         if isinstance(row, tuple):
             if not all(isinstance(x, int) for x in row):
-                raise TypeError("Row index tuple must only contain integer indices.")
+                raise TypeError("Row index tuple must only contain integer indices")
             if any(x == self._shape[0] or abs(x) > self._shape[0] for x in row):
-                raise IndexError("At least one row index out of range in index tuple.")
+                raise IndexError("At least one row index out of range in index tuple")
 
     def _check_colindex(self, col: IndexT) -> None:
         """Checks whether a column index is in range or out of range.
@@ -227,15 +227,15 @@ class MatrixABC(ABC, Generic[T]):
         """
         if not isinstance(col, (int, tuple, slice)):
             raise TypeError(
-                f"Column index must be of type int | slice | tuple[int, ...], {type(col)!r} given."
+                f"Column index must be of type int | slice | tuple[int, ...], not {type(col)!r} given"
             )
         if isinstance(col, int) and (col == self._shape[1] or abs(col) > self._shape[1]):
             raise IndexError("Column index out of range")
         if isinstance(col, tuple):
             if not all(isinstance(x, int) for x in col):
-                raise TypeError("Row index tuple must only contain integer indices.")
+                raise TypeError("Row index tuple must only contain integer indices")
             if any(x == self._shape[0] or abs(x) > self._shape[0] for x in col):
-                raise IndexError("At least one row index out of range in index tuple.")
+                raise IndexError("At least one row index out of range in index tuple")
 
     def _rowtoindices(self, index: IndexT) -> tuple[int]:
         """Converts an integer or a slice to a tuple of row indices.
@@ -332,7 +332,10 @@ class MatrixABC(ABC, Generic[T]):
             cols = rows[1]
             rows = rows[0]
         elif not isinstance(rows, int) or not isinstance(cols, int):
-            raise ValueError("Arguments 'rows' and 'cols' must be of type 'int'")
+            raise ValueError(
+                "Arguments 'rows' and 'cols' must both be of type 'int', "
+                f"not {type(rows)} and {type(cols)}"
+            )
         self._check_shape((rows, cols))
         if rows > self._shape[0]:
             rows_to_add = rows - self._shape[0]
@@ -752,7 +755,7 @@ class MatrixABC(ABC, Generic[T]):
     def _imatmul(self, other: MatrixABC[Any]) -> None:
         """Matrix-multiplies internal data with *other* matrix."""
         if self._shape != (other._shape[1], other._shape[0]):
-            raise ValueError("Shape of *other* matrix not compatible for matrix multiplication.")
+            raise ValueError("Shape of *other* matrix not compatible for matrix multiplication")
         self._data = list(matmul(self._data, other._data))  # type: ignore
         self._shape = (self._shape[0], other._shape[1])
         self._calculate_helpers()
@@ -1127,7 +1130,20 @@ class MatrixABC(ABC, Generic[T]):
             col: IndexT,
             values: Sequence[Sequence[T]] | Sequence[T] | MatrixABC[T]
     ) -> None:
-        raise NotImplementedError()
+        rows = self._rowtoindices(row)
+        cols = self._coltoindices(col)
+        cells = [(r, c) for r in rows for c in cols]
+        if not isinstance(values, (Sequence, MatrixABC)):
+            raise TypeError(
+                "Argument 'values' must be of type Sequence[T], "
+                f"Sequence[Sequence[T]], or MatrixT, not {type(values)}"
+            )
+        if len(values) < len(cells) and len(values) > 0 and isinstance(values[0], Sequence):
+            values = list(chain(*values))
+        if len(values) != len(cells):
+            raise ValueError(f"Attempting to assign {len(values)} values to {len(cells)} cells")
+        for (row, col), value in zip(cells, values, strict=True):
+            self._setitem(row, col, value)
 
     @overload
     def get(self, index: tuple[IndexT, IndexT]) -> T | Self:
