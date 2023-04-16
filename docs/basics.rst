@@ -402,3 +402,195 @@ provides a number of convenient functions to accomplish this.
 .. py:function:: m.transpose()
 
    TO BE WRITTEN
+
+
+Accessing values in a matrix
+----------------------------
+
+.. py:function:: m.copy()
+
+   TO BE WRITTEN
+
+   :rtype: Matrix[~T] | FrozenMatrix[~T]
+   :returns: Returns a shallow copy of *self*.
+
+.. py:function:: m.get(row, col)
+.. py:function:: m.get(key)
+   :noindex:
+.. py:function:: m[row, col]
+.. py:function:: m[key]
+
+   TO BE WRITTEN
+
+   :param tuple[IndexT, IndexT] key: A tuple of *row* and *col* indeces.
+   :param IndexT row: The row index for the cell(s) to retreive, can be an
+      integer to refer to a single row, a slice to refer to a subset of rows,
+      or a tuple of row indices to select any arbitrary number of rows.
+   :param IndexT col: The column index for the cell(s) to retreive, can be an
+      integer to refer to a single column, a slice to refer to a subset of
+      columns, or a tuple of column indices to select any arbitrary number of
+      columns.
+   :rtype: ~T | Matrix[~T] | FrozenMatrix[~T]
+   :returns: Returns the value of the cell specified by *row*, *col* if these
+      refer to a single cell (i.e. both *row* and *cell* are single integers),
+      otherwise returns a new :class:`Matrix` or :class:`FrozenMatrix` object
+      containing the selected rows and column (possibly 0x0, *n*\ x0 or
+      0x\ *n*), following standard Python slice logic and intersecting the
+      slices where appropriate.
+
+.. py:function:: m.items(* [, by])
+
+   TO BE WRITTEN
+
+   See also :func:`m.asdict()` for a method which returns the same data as
+   a dictionary rather than a list of tuples.
+
+   :param RowColT by: One of the literals :code:`"row"` (the default) or
+      :code:`"col"`, specifies whether the list of key-value pairs should be
+      constructed by row-wise or column-wise iteration of the matrix.
+   :rtype: list[tuple[tuple[int, int], ~T]]
+   :returns: Returns a list of tuples where the first member of each tuple is
+      a key tuple (a tuple with indices of the form :code:`(row, col)`) and the
+      second member of the tuple is the value of the cell indexed by that key.
+      The list is ordered row-wise or column-wise depending on *by*.
+
+.. py:function:: m.keys(* [, by])
+
+   TO BE WRITTEN
+
+   :param RowColT by: One of the literals :code:`"row"` (the default) or
+      :code:`"col"`, specifies whether the list of keys should be constructed
+      by row-wise or column-wise iteration of the matrix.
+   :rtype: list[tuple[int, int]]
+   :returns: Returns a list of tuples with all the keys (aka row and column
+      indices) of the matrix, ordered row-wise or column-wise depending on
+      *by*. Each tuple has the form :code:`(row, col)`.
+
+.. py:function:: m.values(* [, by])
+
+   TO BE WRITTEN
+
+   :param RowColT by: One of the literals :code:`"row"` (the default) or
+      :code:`"col"`, specifies whether the list of values should be constructed
+      by row-wise or column-wise iteration of the matrix.
+   :rtype: list[~T]
+   :returns: Returns a list of all the cell values in the matrix, ordered
+      row-wise or column-wise depending on *by*.
+
+.. py:function:: submatrix(rows, cols)
+
+   TO BE WRITTEN
+
+Iteration over matrices
+-----------------------
+
+.. py:function:: m.foreach(func [, *args, **kwargs])
+
+   TO BE WRITTEN
+
+.. py:function:: iter(m)
+
+   TO BE WRITTEN
+
+.. py:function:: m.map(func [, *args, **kwargs])
+
+   TO BE WRITTEN
+
+
+Common operations on matrices
+-----------------------------
+
+.. py:function:: value in m
+
+   TO BE WRITTEN
+
+.. py:function:: m is other
+
+   TO BE WRITTEN
+
+.. py:function:: m == other
+
+   TO BE WRITTEN
+
+.. py:function:: m.matadd(other)
+.. py:function:: m.scaladd(scalar)
+.. py:function:: m + other
+.. py:function:: m + scalar
+
+   TO BE WRITTEN
+
+.. py:function:: m.matmul(other)
+.. py:function:: m.scalmul(scalar)
+.. py:function:: m @ other
+.. py:function:: m * scalar
+.. py:function:: scalar * m
+
+   TO BE WRITTEN
+
+.. py:function:: m.matsub(other)
+.. py:function:: m.scalsub(scalar)
+.. py:function:: m - other
+.. py:function:: m - scalar
+
+   TO BE WRITTEN
+
+
+In-place matrix operations
+--------------------------
+
+Most of the common matrix operations also implement an in-place
+variant for :class:`Matrix` objects (but obviouslt *not* for
+:class:`FrozenMatrix` objects). These modify the matrix in-place
+instead of returning a new :class:`Matrix` or :class:`FrozenMatrix`
+object.
+
+Scalar in-place operations:
+
+* :code:`m.iscaladd(scalar)`, :code:`m += scalar`, see :func:`m.scaladd()`.
+* :code:`m.iscalmul(scalar)`, :code:`m *= scalar`, see :func:`m.scalmul()`.
+* :code:`m.iscalsub(scalar)`, :code:`m -= scalar`, see :func:`m.scalsub()`.
+
+Matrix in-place operations:
+
+* :code:`m.imatadd(other)`, :code:`m += other`, see :func:`m.matadd()`.
+* :code:`m.imatmul(other)`, :code:`m @= other`, see :func:`m.matmul()`.
+* :code:`m.imatsub(other)`, :code:`m -= other`, see :func:`m.matsub()`.
+
+See the respective regular operation. The semantics are the same except for
+the result being stored directly in the matrix *m*.
+
+
+Converting matrices to other formats
+------------------------------------
+
+.. py:function:: m.aslist(* [, by])
+
+   TO BE WRITTEN
+
+   See also :func:`m.values()` which returns a flat list of the matrix's
+   values.
+
+   :param RowColT by: One of the literals :code:`"row"` (the default) or
+      :code:`"col"`, specifies whether the list of lists should be constructed
+      by row-wise or column-wise iteration of the matrix. 
+   :rtype: list[list[~T]]
+   :returns: Returns a list of lists, with the sublists containing the
+      values of the matrix either by column or by row, depending on *by*.
+
+.. py:function:: m.asdict()
+
+   TO BE WRITTEN
+
+   :rtype: dict[tuple[int, int], ~T]
+   :returns: Returns a dictionary where they keys are tuples of indices of the
+      form :code:`(row, col)` and values the values of the cells with that
+      index.
+
+.. py:function:: repr(m)
+
+   TO BE WRITTEN
+
+.. py:function:: str(m)
+
+   TO BE WRITTEN
+

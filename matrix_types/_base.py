@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from itertools import chain
 from more_itertools import chunked, matmul
-from typing import Any, Callable, Generic, Self, Sequence, Sized, overload
+from typing import Any, Callable, Generic, Self, Iterator, Sequence, Sized, overload
 
 from ._types import T, V, RowColT, IndexT
 from ._formatter import format_matrix
@@ -1072,7 +1072,7 @@ class MatrixABC(ABC, Generic[T]):
             return list(chain(*transposed))
         raise TypeError("Argument 'by' must be literal 'row' or 'col'")
 
-    def items(self, *, by: RowColT = "row") -> list[T]:
+    def items(self, *, by: RowColT = "row") -> list[tuple[tuple[int, int], T]]:
         """Returns a list of key--value pairs for all cells in the matrix.
 
         Each item in the returned list is a tuple of the form
@@ -1166,11 +1166,35 @@ class MatrixABC(ABC, Generic[T]):
             self._setitem(row, col, value)
 
     @overload
-    def get(self, index: tuple[IndexT, IndexT]) -> T | Self:
+    def get(self, key: tuple[int, int]) -> T:
         ...
 
     @overload
-    def get(self, row: IndexT, col: IndexT) -> T | Self:
+    def get(self, key: tuple[slice | tuple[int, ...], int]) -> Self:
+        ...
+
+    @overload
+    def get(self, key: tuple[int, slice | tuple[int, ...]]) -> Self:
+        ...
+
+    @overload
+    def get(self, key: tuple[slice | tuple[int, ...], slice | tuple[int, ...]]) -> Self:
+        ...
+
+    @overload
+    def get(self, row: int, col: int) -> T:
+        ...
+
+    @overload
+    def get(self, row: slice | tuple[int, ...], col: int) -> Self:
+        ...
+
+    @overload
+    def get(self, row: int, col: slice | tuple[int, ...]) -> Self:
+        ...
+
+    @overload
+    def get(self, row: slice | tuple[int, ...], col: slice | tuple[int, ...]) -> Self:
         ...
 
     def get(self, row: IndexT, col: IndexT | None = None) -> T | Self:
@@ -1211,7 +1235,7 @@ class MatrixABC(ABC, Generic[T]):
             )
         return self.get(key[0], key[1])
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[int, int]]:
         return iter(self.keys())
 
     # DUNDER METHODS
@@ -1261,6 +1285,9 @@ class MatrixABC(ABC, Generic[T]):
         return self.scalsub(other)
 
     def __mul__(self, other: V) -> Self | MatrixABC[V]:
+        return self.scalmul(other)
+
+    def __rmul__(self, other: V) -> Self | MatrixABC[V]:
         return self.scalmul(other)
 
     def __matmul__(self, other: MatrixABC[V]) -> Self | MatrixABC[V]:
