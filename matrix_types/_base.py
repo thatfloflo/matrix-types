@@ -289,6 +289,26 @@ class MatrixABC(ABC, Generic[T]):
             index.step or 1
         ))
 
+    # PROPERTIES
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        """Returns the shape of the matrix."""
+        return self._shape
+
+    @property
+    def default(self) -> T:
+        """Returns the *default* value for the matrix."""
+        return self._default
+
+    def empty(self) -> bool:
+        """Returns :code:`False` if at least one value in the """
+        if 0 in self._shape:
+            return True
+        return all(
+            self._data[r][c] == self._default for c in self._colrange for r in self._rowrange
+        )
+
     # SHAPE MANIPULATION
 
     def _transpose(self) -> None:

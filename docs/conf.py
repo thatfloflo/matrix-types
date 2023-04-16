@@ -103,10 +103,10 @@ html_css_files = [
 ]
 html_context = {
     "display_github": True,
-    "github_user": "lart-bangor",
-    "github_repo": "research-client",
+    "github_user": "thatfloflo",
+    "github_repo": project,
     "github_version": "docs",
-    "conf_py_path": "/docs/source/",
+    "conf_py_path": "/docs/",
 }
 html_show_sphinx = False
 html_static_path = ['_static']

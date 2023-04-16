@@ -79,15 +79,15 @@ The constructors for both classes work the same way:
 
          ...
 
-   :param MatrixABC[T] | Sequence[T] | Sequence[Sequence[T]] data: The data to
+   :param MatrixABC[~T] | Sequence[~T] | Sequence[Sequence[~T]] data: The data to
       be used to fill in the initial values of the matrix.
    :param tuple[int, int] shape: The shape the matrix should have in the
       format :code:`(rows, cols)`. Obligatory if *data* is a flat sequence.
-   :param T default: Keyword-only argument specifying the default value to be
+   :param ~T default: Keyword-only argument specifying the default value to be
       used for cells that otherwise have not been assigned any value. Also used
       to evaluate semantically whether a cell (or entire matrix) is
       interpreted as *empty* or not.
-   :rtype: Matrix[T] | FrozenMatrix[T]
+   :rtype: Matrix[~T] | FrozenMatrix[~T]
    :returns: Returns a new :class:`Matrix` or :class:`FrozenMatrix` object.
 
 
@@ -154,12 +154,85 @@ results. For instance::
 Basic properties of matrix objects
 ----------------------------------
 
-.. py:function:: m.shape()
+.. py:function:: bool(m)
 
-   Return the shape of the matrix object as a tuple of the form
-   :code:`(rows, cols)`.
+   Return :code:`True` *iff* any of the cells of the matrix contain a value
+   other than the current *default* value.
 
-   :rtype: tuple[int, int]
+   Always returns :code:`False` for matrices with a zero dimension (i.e.
+   matrices with the shapes 0x0, *n*\ x0, and 0x\ *n*).
+
+   For the inverse of :obj:`bool(m)`, see :func:`m.empty()`.
+
+   .. note::
+      Note that this behaviour may lead to two matrices with the same values
+      comparing as equal, while one of these matrices evaluates as :code:`True`
+      and the other as :code:`False`, namely if they have different default
+      values.
+
+      :Example:
+
+         .. code:: python
+         
+            a = Matrix([1, 1, 1, 1], (2, 2), default=0)
+            b = Matrix([1, 1, 1, 1], (2, 2), default=1)
+
+            a == b  # Evaluates to True, because both matrices have the same values
+            bool(a) # Evaluates to True, because at least one of the values is not 0
+            bool(b) # Evaluates to False, because all the values are 1 (the default)
+
+   :rtype: bool
+
+.. py:property:: m.default
+
+   The current default value of the matrix.
+
+   *Read-only* on immutable :class:`FrozenMatrix` objects,
+   *read-write* on mutable :class:`Matrix` objects.
+
+   Altering the default will *never* affect the data already present in a
+   matrix, it will only affect value comparisons and new values inserted after
+   the default was modified. For example::
+
+      >>> a = Matrix([], (3, 3), default=0)
+      >>> a.empty()
+      True
+      >>> a.default = 1
+      >>> a.empty()
+      False
+      >>> a.resize(4, 4)
+      >>> print(a)
+           0  1  2  3
+        ┌             ┐
+      0 │  0  0  0  1 │
+      1 │  0  0  0  1 │
+      2 │  0  0  0  1 │
+      3 │  1  1  1  1 │
+        └             ┘
+
+   To change the default value on immutable :class:`FrozenMatrix` objects, you
+   must create a new :class:`FrozenMatrix` object with the *default* property
+   overwritten. For example::
+
+      >>> a = FrozenMatrix([], (3, 3), default=0)
+      >>> bool(a)
+      False
+      >>> b = FrozenMatrix(a, default=1)  # a with the default overwritten
+      >>> bool(b)
+      True
+
+   :type: *~T*
+
+.. py:function:: m.empty()
+
+   Return :code:`True` *iff* all of the cells of the matrix are equal to the
+   current *default* value, or the matrix has a zero dimension (i.e.
+   matrices with the shapes 0x0, *n*\ x0, and 0x\ *n*). Return :code:`False`
+   otherwise.
+
+   For the inverse of :func:`m.empty()`, see :obj:`bool(m)`.
+
+   :rtype: bool
 
 .. py:function:: len(m)
 
@@ -168,3 +241,164 @@ Basic properties of matrix objects
    would be *5 \* 10 =* **50**.
 
    :rtype: int
+
+.. py:property:: m.shape
+
+   The current shape of the matrix in the form :code:`(rows, cols)`.
+
+   *Read-only* on immutable :class:`FrozenMatrix` objects,
+   *read-write* on mutable :class:`Matrix` objects.
+
+   To alter the shape on :class:`FrozenMatrix` objects, use :func:`m.resize()`
+   or make a new object with the *shape* property overwritten instead.
+
+   :type: tuple[int, int]
+
+
+Row and column manipulation
+---------------------------
+
+Shape modifications, such as the addition, removal, or swapping of rows or
+columns are a mainstay when working with matrices. The |project| package
+provides a number of convenient functions to accomplish this.
+
+.. py:function:: m.appendcol(data)
+
+   Append a column with values *data* to the right of the matrix.
+
+   :param Sequence[~T] data: The values to be inserted in the new column.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.appendrow(data)
+
+   Append a row with values *data* to the bottom of the matrix.
+
+   :param Sequence[~T] data: The values to be inserted in the new row.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.flip(* [, by])
+
+   TO BE WRITTEN
+
+.. py:function:: m.fliph()
+
+   TO BE WRITTEN
+
+.. py:function:: m.flipv()
+
+   TO BE WRITTEN
+
+.. py:function:: m.insertcol(index, data)
+
+   Insert a column with values *data* to the left of the column referenced by
+   *index*.
+
+   :param int index: The column index before which the new column should be
+      inserted.
+   :param Sequence[~T] data: The values to be inserted in the new column.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.insertrow(index, data)
+
+   Insert a row with values *data* to the top of the row referenced by
+   *index*.
+
+   :param int index: The row index before which the new row should be inserted.
+   :param Sequence[~T] data: The values to be inserted in the new row.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.prependcol(data)
+
+   Prepend a column with values *data* at the left of the matrix.
+
+   :param Sequence[~T] data: The values to be inserted in the new column.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.prependrow(data)
+
+   Prepend a row with values *data* at the top of the matrix.
+
+   :param Sequence[~T] data: The values to be inserted in the new row.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.removecol(index)
+
+   TO BE WRITTEN
+
+.. py:function:: m.removerow(index)
+
+   TO BE WRITTEN
+
+.. py:function:: m.resize(rows, cols)
+
+   TO BE WRITTEN
+
+.. py:function:: m.swapcols(a_index, b_index)
+
+   Swap the two columns with indices *a_index* and *b_index*.
+
+   :Example:
+
+      >>> a = Matrix([[0, 1, 2], [0, 1, 2]], default=0)
+      >>> print(a)
+          0  1  2
+        ┌         ┐
+      0 │ 0  1  2 │
+      1 │ 0  1  2 │
+        └         ┘
+      >>> print(a.swapcols(0, 2))
+          0  1  2
+        ┌         ┐
+      0 │ 2  1  0 │
+      1 │ 2  1  0 │
+        └         ┘
+
+   :param int a_index: The column index of the first column to be swapped.
+   :param int b_index: The column index of the second column to be swapped.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.swaprows(a_index, b_index)
+
+   Swap the two rows with indices *a_index* and *b_index*.
+
+   :Example:
+
+      >>> a = Matrix([[0, 0], [1, 1], [2, 2]], default=0)
+      >>> print(a)
+          0  1
+        ┌      ┐
+      0 │ 0  0 │
+      1 │ 1  1 │
+      2 │ 2  2 │
+        └      ┘
+      >>> print(a.swaprows(0, 2))
+          0  1
+        ┌      ┐
+      0 │ 2  2 │
+      1 │ 1  1 │
+      2 │ 0  0 │
+        └      ┘
+
+   :param int a_index: The row index of the first row to be swapped.
+   :param int b_index: The row index of the second row to be swapped.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
+
+.. py:function:: m.transpose()
+
+   TO BE WRITTEN

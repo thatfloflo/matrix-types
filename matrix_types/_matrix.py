@@ -248,6 +248,24 @@ class Matrix(MatrixABC[T]):
         self._map(func, *args, **kwargs)
         return self
 
+    # PROPERTIES
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        return self._shape
+
+    @shape.setter
+    def shape(self, shape: tuple[int, int]):
+        self.resize(shape)
+
+    @property
+    def default(self) -> T:
+        return self._default
+
+    @default.setter
+    def default(self, default: T) -> None:
+        self._default = default
+
     # DATA GETTERS AND SETTERS
 
     @overload
