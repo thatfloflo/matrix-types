@@ -283,7 +283,7 @@ class Matrix(MatrixABC[T]):
             arg3: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | None = None
             ) -> T | Self:
         """
-        >>> from matrix_types import Matrix
+        >>> from matrices import Matrix
         >>> m = Matrix([[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20]], default=0)
         >>> print(m[1:3, 2:4])
                 0   1

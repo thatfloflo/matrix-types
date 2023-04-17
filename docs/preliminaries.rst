@@ -12,8 +12,13 @@ programming algorithms, image manipulation, etc. It is best to think of a
 matrix as a two-dimensional table, with numbered rows and columns uniquely
 identifying each cell of the table.
 
-For example, the matrix below as 3 rows (numbered 0-2) and 5 columns
-(numbered 0-4), we call this a 3x5 matrix.
+For example, the matrix below has 3 rows (numbered 0-2) and 5 columns
+(numbered 0-4), we call this a 3x5 matrix:
+
+:math:`\begin{bmatrix}(0,0) & (0,1) & (0,2) & (0,3) & (0,4)\\(0,1) & (1,1) & (1,2) & (1,3) & (1,4)\\(0,2) & (2,1) & (2,2) & (2,3) & (2,4)\end{bmatrix}`
+
+We can think of this matrix as a *table*, with the header column and header row
+showing the *row* and *column* indices, respectively:
 
 +-------+-------+-------+-------+-------+-------+
 |       | **0** | **1** | **2** | **3** | **4** |
@@ -55,7 +60,7 @@ tuples of tuples, and similar. For example, a common way of representing the
         ["2, 0", "2, 1", "2, 2", "2, 3", "2, 4"],
     ]
 
-This if often convenient because we already have all the pieces we need in
+This is often convenient because we already have all the pieces we need in
 Python's standard library, but it also makes some things more cumbersome than
 the should be. For example, to find the dimensions of such a matrix, we have
 to *know* that it is implemented a sequence of sequences, and then minimally

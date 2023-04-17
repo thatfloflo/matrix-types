@@ -61,7 +61,7 @@ extensions = [
 github_username = 'thatfloflo'
 github_repository = 'matrix-types'
 
-autoapi_dirs = ['../matrix_types']
+autoapi_dirs = ['../matrices']
 autodoc_default_options = {
     'members': True,
     'private-members': False,
@@ -76,7 +76,11 @@ autoclass_content = 'class'
 autodoc_member_order = 'groupwise'
 autodoc_typehints = 'both'
 autodoc_typehints_format = 'short'
-autodoc_type_aliases = {'MatrixT': 'matrix_types.MatrixT'}
+autodoc_type_aliases = {
+    'MatrixT': 'matrices.MatrixT',
+    'IndexT': 'matrices._types.IndexT',
+    'RowColT': 'matrices._types.RowColT',
+}
 autodoc_preserve_defaults = True
 typehints_defaults = 'comma'
 autodoc_show_sourcelink = True

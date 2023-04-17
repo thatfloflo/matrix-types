@@ -1,5 +1,5 @@
 import pytest  # noqa: F401
-from matrix_types import Matrix
+from matrices import Matrix
 from common import (
     CommonInitTests, CommonGetterTests, CommonShapeTests,
     CommonRowOperationTests, CommonColumnOperationTests,

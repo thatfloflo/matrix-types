@@ -14,9 +14,9 @@ class Sentinel:
         return self.repr
 
 
-NotGiven: Final = Sentinel("NotGiven", module_name="matrix_types")
+NotGiven: Final = Sentinel("NotGiven", module_name="matrices")
 
-MISSING: Final = Sentinel("MISSING", module_name="matrix_types")
+MISSING: Final = Sentinel("MISSING", module_name="matrices")
 """Sentinal constant to indicate a missing value.
 
 The `MISSING` sentinel can be used where a missing value needs to be indicated
@@ -29,9 +29,9 @@ from the built-in :code:`None`.
 
 Note that the type of `MISSING` is not completely unique to `MISSING` (unlike
 e.g. :code:`NoneType` is to :code:`None`). This should only affect code working
-with the internals of a :class:`MatrixABC` derived class or the `matrix_types`
-package. The type is :code`matrix_types._types.Sentinel`, which may be shared
-by other sentinel values used internally in the `matrix_types` package.
+with the internals of a :class:`MatrixABC` derived class or the `matrices`
+package. The type is :code`matrices._types.Sentinel`, which may be shared
+by other sentinel values used internally in the `matrices` package.
 Therefore, using comparisons based on :code:`type()`,
 :code:`issubclass()` or :code:`isinstance()` cannot be used to reliably
 infer that the passed object must be `MISSING`.

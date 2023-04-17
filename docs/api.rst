@@ -3,7 +3,7 @@
 API Documentation
 =================
 
-.. currentmodule:: matrix_types
+.. currentmodule:: matrices
 
 .. autosummary::
     :toctree: generated

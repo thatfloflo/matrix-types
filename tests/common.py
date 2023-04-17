@@ -1,7 +1,7 @@
 import pytest  # noqa: F401
 from typing import ClassVar
-from matrix_types._base import MatrixABC
-from matrix_types import Matrix, FrozenMatrix
+from matrices._base import MatrixABC
+from matrices import Matrix, FrozenMatrix
 
 
 class CommonTestBase:

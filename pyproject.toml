@@ -5,7 +5,7 @@ authors = ["Florian Breit <florian@florian.me.uk>"]
 license = "MIT"
 description = "Matrix and FrozenMatrix types in pure Python."
 readme = "README.rst"
-packages = [{include = "matrix_types"}]
+packages = [{include = "matrices"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"

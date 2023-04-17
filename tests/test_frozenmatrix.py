@@ -1,5 +1,5 @@
 import pytest  # noqa: F401
-from matrix_types import FrozenMatrix
+from matrices import FrozenMatrix
 from common import (
     CommonInitTests, CommonGetterTests, CommonShapeTests,
     CommonRowOperationTests, CommonColumnOperationTests,

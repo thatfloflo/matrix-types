@@ -55,7 +55,7 @@ The constructors for both classes work the same way:
 
       .. code:: python
          
-         from matrix_types import Matrix, FrozenMatrix
+         from matrices import Matrix, FrozenMatrix
 
          # Matrices with 2 rows, 3 columns, and all cells filled with '0'
          a = Matrix([], (2, 3), default=0)
@@ -594,3 +594,15 @@ Converting matrices to other formats
 
    TO BE WRITTEN
 
+
+Here is some math:
+
+.. math::
+   :nowrap:
+
+   \begin{eqnarray}
+      y    & = & ax^2 + bx + c \\
+      f(x) & = & x^2 + 2xy + y^2
+   \end{eqnarray}
+
+That was math...

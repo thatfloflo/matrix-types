@@ -18,7 +18,7 @@ from ._frozen_matrix import FrozenMatrix
 from typing import TypeAlias
 
 MatrixT: TypeAlias = Matrix | FrozenMatrix | MatrixABC
-"""Type alias for matrix types in `matrix_types`.
+"""Type alias for matrix types in `matrices`.
 
 This type alias can be used for type annotations whenever any of the matrix
 types (e.g. :class:`Matrix`, :class:`FrozenMatrix`) would acceptable.
