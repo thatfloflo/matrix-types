@@ -25,7 +25,8 @@ avoid or spot potential issues in your code before they become a problem.
    :caption: Contents
 
    preliminaries
-   basics
+   install
+   usage
    api
 
 

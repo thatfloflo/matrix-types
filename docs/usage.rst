@@ -51,9 +51,8 @@ The constructors for both classes work the same way:
 
    :Examples:
 
-      Constructing matrix objects from a flat sequence:
-
-      .. code:: python
+      .. code-block:: python
+         :caption: Constructing matrix objects from a flat sequence
          
          from matrices import Matrix, FrozenMatrix
 
@@ -67,17 +66,27 @@ The constructors for both classes work the same way:
          c = Matrix([1, 2, 3, 4], (2, 2), default=0)
          d = FrozenMatrix(range(100), (2, 2), default=0)
 
-      Constructing matrix objects from sequences of sequences:
+      .. code-block:: python
+         :caption: Constructing matrix objects from sequences of sequences
 
-      .. code:: python
+         from matrices import Matrix, FrozenMatrix
 
-         ...
+         # 2x2 matrices of the form
+         #    1  2
+         #    3  4
+         a = Matrix([[1, 2], [3, 4]], default=0)  # The shape can be inferred
+         b = FrozenMatrix([[1, 2] [3, 4]], (2, 2), default=0)  # Explicit shape
 
-      Constructing matrix objects from other matrix objects:
+      .. code-block:: python
+         :caption: Constructing matrix objects from other matrix objects
 
-      .. code:: python
+         from matrices import Matrix, FrozenMatrix
 
-         ...
+         # 2x2 matrices of the form
+         #    1  2
+         #    3  4
+         a = Matrix([[1, 2], [3, 4]], default=0)  # Construct mutable matrix
+         b = FrozenMatrix(a)  # Immutable copy of a
 
    :param MatrixABC[~T] | Sequence[~T] | Sequence[Sequence[~T]] data: The data to
       be used to fill in the initial values of the matrix.
@@ -172,7 +181,7 @@ Basic properties of matrix objects
 
       :Example:
 
-         .. code:: python
+         .. code-block:: python
          
             a = Matrix([1, 1, 1, 1], (2, 2), default=0)
             b = Matrix([1, 1, 1, 1], (2, 2), default=1)
@@ -282,15 +291,66 @@ provides a number of convenient functions to accomplish this.
 
 .. py:function:: m.flip(* [, by])
 
-   TO BE WRITTEN
+   Flip the order a matrix's rows or columns.
+
+   If *by* is :code:`"row"` (the default), then the order of the rows in the
+   matrix will be flipped (i.e. reversed). If *by* is :code:`col`, then the
+   order of the columns in the matrix will be flipped.
+
+   :Examples:
+
+      .. code-block:: python
+         :caption: Flipping rows
+
+         m = FrozenMatrix([[1, 1], [2, 2]], default=0)
+         print(m)
+         # Output:
+         #      0  1
+         #    ┌      ┐
+         #  0 │ 1  1 │
+         #  1 │ 2  2 │
+         #    └      ┘
+         print(m.flip())
+         # Output:
+         #      0  1
+         #    ┌      ┐
+         #  0 │ 2  2 │
+         #  1 │ 1  1 │
+         #    └      ┘
+
+      .. code-block:: python
+         :caption: Flipping columns
+
+         m = FrozenMatrix([[1, 2], [1, 2]], default=0)
+         print(m)
+         # Output:
+         #      0  1
+         #    ┌      ┐
+         #  0 │ 1  2 │
+         #  1 │ 1  2 │
+         #    └      ┘
+         print(m.flip(by="col"))
+         # Output:
+         #      0  1
+         #    ┌      ┐
+         #  0 │ 2  1 │
+         #  1 │ 2  1 │
+         #    └      ┘
+
+   :param RowColT by: One of the literals :code:`"row"` (the default) or
+      :code:`"col"`, specifies whether the matrix should be flipped row-wise
+      or column-wise.
+   :rtype: Self | FrozenMatrix[~T]
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a flipped copy of *self*.
 
 .. py:function:: m.fliph()
 
-   TO BE WRITTEN
+   Alias for :code:`m.flip(by="col")`.
 
 .. py:function:: m.flipv()
 
-   TO BE WRITTEN
+   Alias for :code:`m.flip(by="row")`.
 
 .. py:function:: m.insertcol(index, data)
 
@@ -593,16 +653,3 @@ Converting matrices to other formats
 .. py:function:: str(m)
 
    TO BE WRITTEN
-
-
-Here is some math:
-
-.. math::
-   :nowrap:
-
-   \begin{eqnarray}
-      y    & = & ax^2 + bx + c \\
-      f(x) & = & x^2 + 2xy + y^2
-   \end{eqnarray}
-
-That was math...
