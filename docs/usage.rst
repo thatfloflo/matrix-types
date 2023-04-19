@@ -276,7 +276,7 @@ provides a number of convenient functions to accomplish this.
    Append a column with values *data* to the right of the matrix.
 
    :param Sequence[~T] data: The values to be inserted in the new column.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
@@ -285,7 +285,7 @@ provides a number of convenient functions to accomplish this.
    Append a row with values *data* to the bottom of the matrix.
 
    :param Sequence[~T] data: The values to be inserted in the new row.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
@@ -340,7 +340,7 @@ provides a number of convenient functions to accomplish this.
    :param RowColT by: One of the literals :code:`"row"` (the default) or
       :code:`"col"`, specifies whether the matrix should be flipped row-wise
       or column-wise.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a flipped copy of *self*.
 
@@ -360,7 +360,7 @@ provides a number of convenient functions to accomplish this.
    :param int index: The column index before which the new column should be
       inserted.
    :param Sequence[~T] data: The values to be inserted in the new column.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
@@ -371,7 +371,7 @@ provides a number of convenient functions to accomplish this.
 
    :param int index: The row index before which the new row should be inserted.
    :param Sequence[~T] data: The values to be inserted in the new row.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
@@ -380,7 +380,7 @@ provides a number of convenient functions to accomplish this.
    Prepend a column with values *data* at the left of the matrix.
 
    :param Sequence[~T] data: The values to be inserted in the new column.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
@@ -389,21 +389,62 @@ provides a number of convenient functions to accomplish this.
    Prepend a row with values *data* at the top of the matrix.
 
    :param Sequence[~T] data: The values to be inserted in the new row.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 .. py:function:: m.removecol(index)
 
-   TO BE WRITTEN
+   Remove the column at *index*.
+
+   .. caution::
+
+      The column is *removed completely* from the matrix, and the matrix’s
+      shape will be altered. Calling this function does not merely reset the
+      values of items in the targeted column to their default!
+
+   :param int index: The index of the column to be removed.
+   :rtype: Self
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 .. py:function:: m.removerow(index)
 
-   TO BE WRITTEN
+   Remove the row at *index*.
+
+   .. caution::
+
+      The row is *removed completely* from the matrix, and the matrix’s
+      shape will be altered. Calling this function does not merely reset the
+      values of items in the targeted row to their default!
+
+   :param int index: The index of the row to be removed.
+   :rtype: Self
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 .. py:function:: m.resize(rows, cols)
+.. py:function:: m.resize(shape)
+   :noindex:
 
-   TO BE WRITTEN
+   Grow or shrink a matrix.
+
+   Grows or shrinks the matrix depending on whether the new *shape*'s *rows* or
+   *cols* are less than or greater than the current row or column count. Has no
+   effect on the shape if they match the current row and column count.
+
+   Where the new shape has fewer rows or columns the values from these will be
+   lost. Where the new shape has additional rows or columns, these will be
+   populated with :attr:`m.default`.
+
+   :param tuple[int, int] shape: Positional-only argument specifying the shape
+      of the resized matrix in the form :code:`(rows, cols)`.
+   :param int rows: The number of rows the matrix should have after resizing.
+   :param int cols: The number of columns the matrix should have after
+      resizing.
+   :rtype: Self
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 .. py:function:: m.swapcols(a_index, b_index)
 
@@ -427,7 +468,7 @@ provides a number of convenient functions to accomplish this.
 
    :param int a_index: The column index of the first column to be swapped.
    :param int b_index: The column index of the second column to be swapped.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
@@ -455,13 +496,27 @@ provides a number of convenient functions to accomplish this.
 
    :param int a_index: The row index of the first row to be swapped.
    :param int b_index: The row index of the second row to be swapped.
-   :rtype: Self | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 .. py:function:: m.transpose()
 
-   TO BE WRITTEN
+   Transpose the rows and columns of the matrix.
+
+   In a transposed matrix, the first row is converted to the first column,
+   the second row is converted to the second column, and so on.
+   Transposing a matrix twice in a row always returns it to its original form.
+
+   This turns a matrix of the form
+   :math:`\begin{bmatrix}1 & 2 & 3\\4 & 5 & 6\end{bmatrix}`
+   into a matrix of the form
+   :math:`\begin{bmatrix}1 & 4\\ 2 & 5\\3 & 6\end{bmatrix}`.
+   
+
+   :rtype: Self
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 
 Accessing values in a matrix
@@ -469,9 +524,9 @@ Accessing values in a matrix
 
 .. py:function:: m.copy()
 
-   TO BE WRITTEN
+   Return a shallow copy of the matrix.
 
-   :rtype: Matrix[~T] | FrozenMatrix[~T]
+   :rtype: Self
    :returns: Returns a shallow copy of *self*.
 
 .. py:function:: m.get(row, col)
