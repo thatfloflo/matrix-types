@@ -32,9 +32,9 @@ Installing |project| is easiest via :command:`pip install` from
 
 
 To install the very latest, potentially unstable, in-development version
-directly from the github (not recommended --- this should normally only be used
+directly from the github (*not recommended* --- this should normally only be used
 for testing), you can also run
-:code:`python3 -m pip install "matrices @ git+https://github.com/thatfloflo/matric-types.git@main"`.
+:code:`python3 -m pip install "matrices @ git+https://github.com/thatfloflo/matrix-types.git@main"`.
 
 
 Getting started

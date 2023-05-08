@@ -1,7 +1,7 @@
-.. _api_documentation:
+.. _api_reference:
 
-API Documentation
-=================
+API Reference
+=============
 
 .. currentmodule:: matrices
 

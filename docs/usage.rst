@@ -26,14 +26,17 @@ The constructors for both classes work the same way:
    If *shape* is specified, the new matrix will be reshaped by internally
    calling :func:`resize()` to resize the matrix.
    If *default* is specified this will be used as the new default value, but
-   cells with the default already in *data* will never be altered.
+   cells with a value equal to the default (new or old) already in *data* will
+   never be altered.
 
    When constructing a new :class:`Matrix` or :class:`FrozenMatrix` object from
    a sequence of sequences, it is assumed that these are in the form of a
    sequence of rows, with each row being a sequence of column values. The
    *shape* argument is optional, and if not specified will be inferred based on
-   the number of 'row-sequences' and the number of 'column-items' in the first
-   'row-sequence'. If *shape* is specified and does not match the inferred size,
+   the number of 'row-sequences' and the longest sequence of 'column-items'.
+   For instance, :code:`Matrix([[1, 2, 3], [], [1, 2, 3, 4]], default=0)` will
+   yield a matrix object with 3 rows and 4 columns.
+   If *shape* is specified and does not match the inferred size,
    then the data is padded with *default* where too few items are found, while
    items exceeding the expected number are ignored.
    The *default* argument is obligatory because there is no reliable way of
@@ -48,6 +51,12 @@ The constructors for both classes work the same way:
    This offers a very useful pattern for constructing matrices with a single
    value by passing an empty sequence as *data*, e.g. to construct a 3x3
    zero-matrix, we can call :code:`Matrix([], (3, 3), default=0)`.
+
+   Note that to construct matrix objects containing a sequence type (including
+   other matrices), you must either construct them from another matrix or as
+   a sequence of sequences, because they would never be interpreted as a 'flat'
+   sequence upon inspection. For instance, to create a 2x1 matrix containing
+   two-tuples, use :code:`Matrix([[("a", "b")],[("c", "d")]], default=tuple())`.
 
    :Examples:
 
@@ -294,7 +303,7 @@ provides a number of convenient functions to accomplish this.
    Flip the order a matrix's rows or columns.
 
    If *by* is :code:`"row"` (the default), then the order of the rows in the
-   matrix will be flipped (i.e. reversed). If *by* is :code:`col`, then the
+   matrix will be flipped (i.e. reversed). If *by* is :code:`"col"`, then the
    order of the columns in the matrix will be flipped.
 
    :Examples:
@@ -535,7 +544,116 @@ Accessing values in a matrix
 .. py:function:: m[row, col]
 .. py:function:: m[key]
 
-   TO BE WRITTEN
+   Access one or more values in the matrix object.
+
+   Where *row* and *col* are single integers giving a row/column index (or a
+   *key* is a tuple specifying a single row and a column index), return or set
+   the value of the cell indexed by :code:`(row, col)`.
+
+   Example:
+
+      .. code-block:: python
+         :caption: Accessing individual cell values
+
+         a = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+         b = FrozenMatrix(a)
+         print(a[0, 0]) # print 1
+         print(b[1, 2]) # print 6
+         a[0, 0] = 99   # set first cell of a to 99
+         print(a[0, 0]) # print 99
+         b[0, 0] = 99   # TypeError: 'FrozenMatrix' object does not support item assignment
+
+   Where either of the *row* or *col* indices are specified as a slice or
+   a tuple of indices, return or set the values of a submatrix as indicated by
+   the intersection of the selected *row* and *col* indices.
+   
+   When assigning to a matrix using a slice or multiple indeces, the assigned
+   object must be a sequence of an equal length to the matrix object returned
+   by the equivalent access call, and values will be over-written by row-wise
+   assignment.
+
+   Examples:
+
+      .. code-block:: python
+         :caption: Accessing a subset of cells with arbitrary indices
+
+         a = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+         print(a)
+         #     0  1  2
+         #   ┌         ┐
+         # 0 │ 1  2  3 │
+         # 1 │ 4  5  6 │
+         #   └         ┘
+         print(a[0, (0, 2)]) # First row, first and last column
+         #     0  1
+         #   ┌      ┐
+         # 0 │ 1  3 │
+         #   └      ┘
+         a[0, (0, 2)] = (11, 13)
+         print(a)
+         #      0  1   2
+         #   ┌           ┐
+         # 0 │ 11  2  13 │
+         # 1 │  4  5   6 │
+         #   └           ┘
+
+      .. code-block:: python
+         :caption: Accessing a subset of cells with slices
+
+         a = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+         print(a)
+         #     0  1  2
+         #   ┌         ┐
+         # 0 │ 1  2  3 │
+         # 1 │ 4  5  6 │
+         #   └         ┘
+         print(a[0, 1:3]) # First row, second and third column
+         #     0  1
+         #   ┌      ┐
+         # 0 │ 2  3 │
+         #   └      ┘
+         a[0, 1:3] = (12, 13)
+         print(a)
+         #      0   1   2
+         #   ┌            ┐
+         # 0 │  1  12  13 │
+         # 1 │  4   5   6 │
+         #   └            ┘
+
+   As with other sequence types supporting slices, :code:`m[:, :]` can be used
+   to produce a shallow copy of the matrix object.
+
+   .. note::
+
+      If using slice assignment to assign values from one matrix object to
+      another, you must assign :func:`m.values()` rather than :code:`m`
+      directly, otherwise what is assigned are the *keys* of the other matrix,
+      not the values.
+
+      Example:
+
+      .. code-block:: python
+
+         a = Matrix([], shape=(4, 4), default=0)
+         b = Matrix([], shape=(4, 4), default=1)
+         a[1:3, 0:3] = b[1:3, 0:3]
+         print(a)
+         #          0       1       2  3
+         #   ┌                           ┐
+         # 0 │      0       0       0  0 │
+         # 1 │ (0, 0)  (0, 1)  (0, 2)  0 │
+         # 2 │ (1, 0)  (1, 1)  (1, 2)  0 │
+         # 3 │      0       0       0  0 │
+         #   └                           ┘
+         a[1:3, 0:3] = b[1:3, 0:3].values()
+         print(a)
+         #     0  1  2  3
+         #   ┌            ┐
+         # 0 │ 0  0  0  0 │
+         # 1 │ 1  1  1  0 │
+         # 2 │ 1  1  1  0 │
+         # 3 │ 0  0  0  0 │
+         #   └            ┘
 
    :param tuple[IndexT, IndexT] key: A tuple of *row* and *col* indeces.
    :param IndexT row: The row index for the cell(s) to retreive, can be an
@@ -546,12 +664,12 @@ Accessing values in a matrix
       columns, or a tuple of column indices to select any arbitrary number of
       columns.
    :rtype: ~T | Matrix[~T] | FrozenMatrix[~T]
-   :returns: Returns the value of the cell specified by *row*, *col* if these
-      refer to a single cell (i.e. both *row* and *cell* are single integers),
-      otherwise returns a new :class:`Matrix` or :class:`FrozenMatrix` object
-      containing the selected rows and column (possibly 0x0, *n*\ x0 or
-      0x\ *n*), following standard Python slice logic and intersecting the
-      slices where appropriate.
+   :returns: Returns the value of the cell specified by *row*, *col* if both of
+      these refer to a single cell (i.e. both *row* and *cell* are single
+      integers), otherwise returns a new :class:`Matrix` or
+      :class:`FrozenMatrix` object containing the selected rows and column
+      (possibly 0x0, *n*\ x0 or 0x\ *n*), following standard Python slice logic
+      and intersecting the slices where appropriate.
 
 .. py:function:: m.items(* [, by])
 
@@ -594,22 +712,118 @@ Accessing values in a matrix
 
 .. py:function:: submatrix(rows, cols)
 
-   TO BE WRITTEN
+   Get a copy of the matrix object containing only the intersection of *rows*
+   and *cols*.
+
+   :Example:
+
+      >>> a = Matrix([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]], default=0)
+      >>> print(a)
+           0   1   2   3
+         ┌               ┐
+       0 │ 1   2   3   4 │
+       1 │ 5   6   7   8 │
+       2 │ 9  10  11  12 │
+         └               ┘
+      >>> print(a.submatrix(0, 0)) # Selects a single cell
+           0
+         ┌   ┐
+       0 │ 1 │
+         └   ┘
+      >>> print(a.submatrix((0, 2), (0, 1, 2))) # rows 0 and 2, columns 0, 1 and 2
+           0   1   2
+         ┌           ┐
+       0 │ 1   2   3 │
+       1 │ 9  10  11 │
+         └           ┘
+
+   :param IndexT rows: The row indices to select for the submatrix. Can be an
+      integer for a single row, a slice to refer to a subset of rows, or a
+      tuple of row indices to select any arbitrary number of rows.
+   :param IndexT cols: The column indices to select for the submatrix. Can be
+      an integer for a single column, a slice to refer to a subset of columns,
+      or a tuple of column indices to select any arbitrary number of columns.
+   :rtype: Matrix[~T] | FrozenMatrix[~T]
+   :returns: A new matrix object of the same type as the original, containing
+      only the intersection of the specified *rows* and *cols*.
 
 Iteration over matrices
 -----------------------
 
 .. py:function:: m.foreach(func [, *args, **kwargs])
 
-   TO BE WRITTEN
+   Apply *func* to each cell in the matrix.
+
+   Any additional *args* and *kwargs* will be passed as arguments to *func*.
+
+   The return value of *func* will be ignored. To mutate the values of each cell
+   in-place, use :func:`m.map()` instead.
+
+   :func:`m.foreach()` always iterates row-wise.
+
+   :Example:
+
+      >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+      >>> m.foreach(lambda x: print(x) if x % 2 == 0 else ...)
+      2
+      4
+      6
+
+   :param Callable[..., Any] func: A callable accepting at least one argument
+      (namely the value of each cell as the matrix is iterated over).
+   :param Any args: Optional positional arguments to be passed to *func*.
+   :param Any kwargs: Optional keyword arguments to be passed to *func*.
+   :rtype: Self
+   :returns: Always returns *self*, even in the case of an immutable
+      :class:`FrozenMatrix` object, since the matrix object itself is never
+      modified by :func:`m.foreach()`.
 
 .. py:function:: iter(m)
 
-   TO BE WRITTEN
+   Return an iterator object iterating over the row and column indices of the
+   matrix object (not the cell values directly). The iterator always iterates
+   over the matrix row-wise.
+
+   :Example:
+
+      >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+      >>> for row, col in iter(m):
+      ...     if m[row, col] % 2 == 0:
+      ...         print(f"{m[row, col]} is even")
+      ...     else:
+      ...         print(f"{m[row, col]} is odd")
+      ...
+      1 is odd
+      2 is even
+      3 is odd
+      4 is even
+      5 is odd
+      6 is even
+
+
+   :param Callable[..., ~T] func: A callable accepting at least one argument
+      (namely the value of each cell as the matrix is iterated over) and
+      returning a value compatible with the type of the matrix object.
+   :param Any args: Optional positional arguments to be passed to *func*.
+   :param Any kwargs: Optional keyword arguments to be passed to *func*.
+   :rtype: Self
+   :rtype: Iterator
+   :returns: An iterator over tuples of row and column indices.
 
 .. py:function:: m.map(func [, *args, **kwargs])
 
-   TO BE WRITTEN
+   Apply *func* to each cell in the matrix and store the return value of *func*
+   as the new cell value.
+   
+   Any additional *args* or *kwargs* passed after *func* will be passed as
+   parameters to *func*.
+
+   This will mutate the values of each cell in-place based on the return value
+   of *func*. To apply *func* without affecting the values store in the matrix,
+   use :func:`m.foreach()` instead.
+
+   :returns: Mutable :class:`Matrix` objects return *self*, immutable
+      :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 
 Common operations on matrices

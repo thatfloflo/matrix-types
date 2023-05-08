@@ -233,9 +233,9 @@ class MatrixABC(ABC, Generic[T]):
             raise IndexError("Column index out of range")
         if isinstance(col, tuple):
             if not all(isinstance(x, int) for x in col):
-                raise TypeError("Row index tuple must only contain integer indices")
-            if any(x == self._shape[0] or abs(x) > self._shape[0] for x in col):
-                raise IndexError("At least one row index out of range in index tuple")
+                raise TypeError("Column index tuple must only contain integer indices")
+            if any(x == self._shape[1] or abs(x) > self._shape[1] for x in col):
+                raise IndexError("At least one column index out of range in index tuple")
 
     def _rowtoindices(self, index: IndexT) -> tuple[int]:
         """Converts an integer or a slice to a tuple of row indices.
@@ -268,8 +268,8 @@ class MatrixABC(ABC, Generic[T]):
 
         :param intorslice: An integer or `slice` object referring to one or
             more column indices.
-        :returns: a tuple of integers with the indices of all the columns within
-            range specified by *intorslice*.
+        :returns: a tuple of integers with the indices of all the columns
+            within range specified by *intorslice*.
         """
         if isinstance(index, int):
             self._check_colindex(index)
