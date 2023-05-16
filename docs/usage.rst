@@ -673,7 +673,32 @@ Accessing values in a matrix
 
 .. py:function:: m.items(* [, by])
 
-   TO BE WRITTEN
+   Return a list of the matrix's items (:code:`(key, value)` pairs).
+
+   The *key* of each returned pair itself is a tuple with row and column
+   indices for the item. This allows for two different ways of destructuring
+   the list returned by :func:`m.items()`:
+
+   .. code-block:: python
+
+      m = Matrix([[1, 2], [3, 4]], default=0)
+      for key, value in m.items():
+         print(f"m at {key} has the value {value}")
+      # m at (0, 0) has the value 1
+      # m at (0, 1) has the value 2
+      # m at (1, 0) has the value 3
+      # m at (1, 1) has the value 4
+      for (row, col), value in m.items():
+         print(f"m[{row}, {col}] has the value {value}")
+      # m[0, 0] has the value 1
+      # m[0, 1] has the value 2
+      # m[1, 0] has the value 3
+      # m[1, 1] has the value 4
+
+   Note that, since :code:`m[(row, col)]` is equivalent to :code:`m[row, col]`
+   (the latter being syntactic sugar for the former), it is not necessary to
+   destructure the key unless you care about the individual values of the row
+   or column indices.
 
    See also :func:`m.asdict()` for a method which returns the same data as
    a dictionary rather than a list of tuples.
@@ -689,7 +714,7 @@ Accessing values in a matrix
 
 .. py:function:: m.keys(* [, by])
 
-   TO BE WRITTEN
+   Return a list of the matrix's keys (:code:`(row, col)` pairs).
 
    :param RowColT by: One of the literals :code:`"row"` (the default) or
       :code:`"col"`, specifies whether the list of keys should be constructed
@@ -701,7 +726,14 @@ Accessing values in a matrix
 
 .. py:function:: m.values(* [, by])
 
-   TO BE WRITTEN
+   Return a list of the matrix's values.
+
+   Note that, unlike Python's native dictionaries, 
+   :class:`Matrix`/:class:`FrozenMatrix` does not use view objects, but returns
+   lists instead. This means that the results of :func:`m.values()` will
+   compare :code:`True` if the list of values and their order is identical,
+   where the results of :code:`dict.values()` would compare :code:`False`
+   even to itself.
 
    :param RowColT by: One of the literals :code:`"row"` (the default) or
       :code:`"col"`, specifies whether the list of values should be constructed
@@ -747,7 +779,7 @@ Accessing values in a matrix
    :returns: A new matrix object of the same type as the original, containing
       only the intersection of the specified *rows* and *cols*.
 
-Iteration over matrices
+Iterating over matrices
 -----------------------
 
 .. py:function:: m.foreach(func [, *args, **kwargs])
@@ -831,34 +863,112 @@ Common operations on matrices
 
 .. py:function:: value in m
 
-   TO BE WRITTEN
+   Return :code:`True` if *m* has a value *value*.
+
+   .. important::
+
+      The semantics of the :code:`in` statement with matrix objects are those
+      of interables like Python's native :obj:`list` type, which look up the
+      values stored in the object.
+      
+      They are not those of the :obj:`dict` type because the keys are strictly
+      numerical, so that you can always check whether a key is within the
+      matrix's range by comparing the value to :obj:`m.shape`.
+
+.. py:function:: value not in m
+
+   Equivalent to :code:`not value in m`.
 
 .. py:function:: m is other
 
-   TO BE WRITTEN
+   Return :code:`True` if and only if *m* and *other* are references to the
+   exact same object.
+
+   This will return :code:`False` for identical but independent
+   :class:`Matrix`/:class:`FrozenMatrix` objects, which is especially important
+   to keep in mind when attempting to compare the objects returned by method
+   calls on :class:`FrozenMatrix` objects, as these will not be the same object
+   if the method might have modified the matrix, whereas they will be the same
+   (modified) object on :class:`Matrix` instances.
 
 .. py:function:: m == other
 
-   TO BE WRITTEN
+   Return :code:`True` if *m* and *other* are matrices of the same shape which
+   contain the same values.
 
 .. py:function:: m.matadd(other)
-.. py:function:: m.scaladd(scalar)
 .. py:function:: m + other
+
+   Add two matrix objects.
+
+   The values of *other* are added to the values of *m* with the same key (row
+   and column index). The *other* matrix must have the same shape as the matrix
+   to which it is added.
+
+   For an in-place variant see :func:`m.imatadd()`.
+
+   :Example:
+
+      >>> m1 = Matrix([], shape=(2, 2), default=0)
+      >>> m2 = FrozenMatrix([[1, 2], [3, 4]], default=0)
+      >>> print(m1 + m2)
+      #     0  1
+      #   ┌      ┐
+      # 0 │ 1  2 │
+      # 1 │ 3  4 │
+      #   └      ┘
+
+   :param MatrixABC[~V] other: The :class:`Matrix` or :class:`FrozenMatrix` to
+      be added to the matrix.
+   :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
+   :returns: Always returns a modified copy of *self*.
+
+.. py:function:: m.scaladd(scalar)
 .. py:function:: m + scalar
+
+   Add *scalar* to each cell of the matrix *m*.
+
+   .. note::
+
+      The :code:`+` operator cannot be used with scalars which are themselves
+      matrix objects (e.g. when adding a matrix to each matrix in a matrix of
+      matrices). Always use :func:`m.scaladd()` if there is a chance that the
+      scalar itself might be a matrix object.
+
+   For an in-place variant see :func:`m.iscaladd()`.
+
+   :Example:
+
+      >>> m = FrozenMatrix([[1, 2], [3, 4]], default=0)
+      >>> print(m + 2)
+      #     0  1
+      #   ┌      ┐
+      # 0 │ 3  4 │
+      # 1 │ 5  6 │
+      #   └      ┘
+
+   :param ~V scalar: The :class:`Matrix` or :class:`FrozenMatrix` to
+      be added to the matrix.
+   :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
+   :returns: Always returns a modified copy of *self*.
+
+.. py:function:: m.matmul(other)
+.. py:function:: m @ other
 
    TO BE WRITTEN
 
-.. py:function:: m.matmul(other)
 .. py:function:: m.scalmul(scalar)
-.. py:function:: m @ other
 .. py:function:: m * scalar
 .. py:function:: scalar * m
 
    TO BE WRITTEN
 
 .. py:function:: m.matsub(other)
-.. py:function:: m.scalsub(scalar)
 .. py:function:: m - other
+
+   TO BE WRITTEN
+
+.. py:function:: m.scalsub(scalar)
 .. py:function:: m - scalar
 
    TO BE WRITTEN
@@ -868,7 +978,7 @@ In-place matrix operations
 --------------------------
 
 Most of the common matrix operations also implement an in-place
-variant for :class:`Matrix` objects (but obviouslt *not* for
+variant for :class:`Matrix` objects (but obviously *not* for
 :class:`FrozenMatrix` objects). These modify the matrix in-place
 instead of returning a new :class:`Matrix` or :class:`FrozenMatrix`
 object.
