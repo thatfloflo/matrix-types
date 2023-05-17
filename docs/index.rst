@@ -39,5 +39,5 @@ Indices and tables
 * :ref:`search`
 
 
-:math:`\begin{bmatrix}m & a & t & r\\i & c & e & s\end{bmatrix}`
+:math:`\begin{bmatrix}\textup{m} & \textup{a} & \textup{t} & \textup{r}\\\textup{i} & \textup{c} & \textup{e} & \textup{s}\end{bmatrix}`
 

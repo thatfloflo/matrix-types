@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project_root_path = Path(__file__).parent.parent
-with open(project_root_path / "pyproject.toml", "rb") as f:
+with open(project_root_path / 'pyproject.toml', 'rb') as f:
     pyproject_toml = tomllib.load(f)
 
 _authors = ", ".join(x[:x.find("<")].strip() for x in pyproject_toml['tool']['poetry']['authors'])
@@ -102,20 +102,21 @@ html_theme_options = {
     'prev_next_buttons_location': 'both',
     'style_nav_header_background': '#2980B9',  # Default: #2980B9
 }
+html_logo = './_static/matrices-logo.svg'
 html_css_files = [
     'style.css',
 ]
 html_context = {
-    "display_github": True,
-    "github_user": "thatfloflo",
-    "github_repo": project,
-    "github_version": "docs",
-    "conf_py_path": "/docs/",
+    'display_github': True,
+    'github_user': 'thatfloflo',
+    'github_repo': project,
+    'github_version': 'docs',
+    'conf_py_path': '/docs/',
 }
 html_show_sphinx = False
 html_static_path = ['_static']
 
 
-rst_epilog = f"""
+rst_epilog = f'''
 .. |project| replace:: *{project}*
-"""
+'''
