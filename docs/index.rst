@@ -37,3 +37,7 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+:math:`\begin{bmatrix}m & a & t & r\\i & c & e & s\end{bmatrix}`
+

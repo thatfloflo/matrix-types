@@ -1,13 +1,15 @@
 The Matrix Types --- *Matrix* and *FrozenMatrix*
 ================================================
 
+
+
 Constructing matrix objects
 ---------------------------
 
 The constructors for both classes work the same way:
 
-.. py:class:: Matrix(data [, shape, *, default])
 
+.. py:class:: Matrix(data [, shape, *, default])
 .. py:class:: FrozenMatrix(data [, shape, *, default])
 
    Return a new :class:`Matrix` or :class:`FrozenMatrix` object, whose cell
@@ -109,6 +111,7 @@ The constructors for both classes work the same way:
    :returns: Returns a new :class:`Matrix` or :class:`FrozenMatrix` object.
 
 
+
 Differences between :class:`Matrix` and :class:`FrozenMatrix`
 -------------------------------------------------------------
 
@@ -145,7 +148,6 @@ results. For instance::
     good(b) # Success: prints '0'
     bad(b)  # Failure: raises IndexError
 
-
 .. important:: *Immutability is imperfect!*
 
    While :class:`FrozenMatrix` does not provide any public functionality that
@@ -169,8 +171,10 @@ results. For instance::
    maintained for all matrix objects.
 
 
+
 Basic properties of matrix objects
 ----------------------------------
+
 
 .. py:function:: bool(m)
 
@@ -200,6 +204,7 @@ Basic properties of matrix objects
             bool(b) # Evaluates to False, because all the values are 1 (the default)
 
    :rtype: bool
+
 
 .. py:property:: m.default
 
@@ -241,6 +246,7 @@ Basic properties of matrix objects
 
    :type: *~T*
 
+
 .. py:function:: m.empty()
 
    Return :code:`True` *iff* all of the cells of the matrix are equal to the
@@ -252,6 +258,7 @@ Basic properties of matrix objects
 
    :rtype: bool
 
+
 .. py:function:: len(m)
 
    Return the number of items (cells) in the matrix. This is always the product
@@ -259,6 +266,7 @@ Basic properties of matrix objects
    would be *5 \* 10 =* **50**.
 
    :rtype: int
+
 
 .. py:property:: m.shape
 
@@ -273,12 +281,14 @@ Basic properties of matrix objects
    :type: tuple[int, int]
 
 
+
 Row and column manipulation
 ---------------------------
 
 Shape modifications, such as the addition, removal, or swapping of rows or
 columns are a mainstay when working with matrices. The |project| package
 provides a number of convenient functions to accomplish this.
+
 
 .. py:function:: m.appendcol(data)
 
@@ -289,6 +299,7 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
+
 .. py:function:: m.appendrow(data)
 
    Append a row with values *data* to the bottom of the matrix.
@@ -297,6 +308,7 @@ provides a number of convenient functions to accomplish this.
    :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
+
 
 .. py:function:: m.flip(* [, by])
 
@@ -353,13 +365,16 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a flipped copy of *self*.
 
+
 .. py:function:: m.fliph()
 
    Alias for :code:`m.flip(by="col")`.
 
+
 .. py:function:: m.flipv()
 
    Alias for :code:`m.flip(by="row")`.
+
 
 .. py:function:: m.insertcol(index, data)
 
@@ -373,6 +388,7 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
+
 .. py:function:: m.insertrow(index, data)
 
    Insert a row with values *data* to the top of the row referenced by
@@ -384,6 +400,7 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
+
 .. py:function:: m.prependcol(data)
 
    Prepend a column with values *data* at the left of the matrix.
@@ -393,6 +410,7 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
+
 .. py:function:: m.prependrow(data)
 
    Prepend a row with values *data* at the top of the matrix.
@@ -401,6 +419,7 @@ provides a number of convenient functions to accomplish this.
    :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
+
 
 .. py:function:: m.removecol(index)
 
@@ -417,6 +436,7 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
+
 .. py:function:: m.removerow(index)
 
    Remove the row at *index*.
@@ -431,6 +451,7 @@ provides a number of convenient functions to accomplish this.
    :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
+
 
 .. py:function:: m.resize(rows, cols)
 .. py:function:: m.resize(shape)
@@ -454,6 +475,7 @@ provides a number of convenient functions to accomplish this.
    :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
+
 
 .. py:function:: m.swapcols(a_index, b_index)
 
@@ -480,6 +502,7 @@ provides a number of convenient functions to accomplish this.
    :rtype: Self
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
+
 
 .. py:function:: m.swaprows(a_index, b_index)
 
@@ -509,6 +532,7 @@ provides a number of convenient functions to accomplish this.
    :returns: Mutable :class:`Matrix` objects return *self*, immutable
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
+
 .. py:function:: m.transpose()
 
    Transpose the rows and columns of the matrix.
@@ -528,8 +552,10 @@ provides a number of convenient functions to accomplish this.
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 
+
 Accessing values in a matrix
 ----------------------------
+
 
 .. py:function:: m.copy()
 
@@ -538,11 +564,13 @@ Accessing values in a matrix
    :rtype: Self
    :returns: Returns a shallow copy of *self*.
 
+
 .. py:function:: m.get(row, col)
 .. py:function:: m.get(key)
    :noindex:
 .. py:function:: m[row, col]
 .. py:function:: m[key]
+   :noindex:
 
    Access one or more values in the matrix object.
 
@@ -671,6 +699,7 @@ Accessing values in a matrix
       (possibly 0x0, *n*\ x0 or 0x\ *n*), following standard Python slice logic
       and intersecting the slices where appropriate.
 
+
 .. py:function:: m.items(* [, by])
 
    Return a list of the matrix's items (:code:`(key, value)` pairs).
@@ -712,6 +741,7 @@ Accessing values in a matrix
       second member of the tuple is the value of the cell indexed by that key.
       The list is ordered row-wise or column-wise depending on *by*.
 
+
 .. py:function:: m.keys(* [, by])
 
    Return a list of the matrix's keys (:code:`(row, col)` pairs).
@@ -723,6 +753,7 @@ Accessing values in a matrix
    :returns: Returns a list of tuples with all the keys (aka row and column
       indices) of the matrix, ordered row-wise or column-wise depending on
       *by*. Each tuple has the form :code:`(row, col)`.
+
 
 .. py:function:: m.values(* [, by])
 
@@ -741,6 +772,7 @@ Accessing values in a matrix
    :rtype: list[~T]
    :returns: Returns a list of all the cell values in the matrix, ordered
       row-wise or column-wise depending on *by*.
+
 
 .. py:function:: submatrix(rows, cols)
 
@@ -779,8 +811,11 @@ Accessing values in a matrix
    :returns: A new matrix object of the same type as the original, containing
       only the intersection of the specified *rows* and *cols*.
 
+
+
 Iterating over matrices
 -----------------------
+
 
 .. py:function:: m.foreach(func [, *args, **kwargs])
 
@@ -809,6 +844,7 @@ Iterating over matrices
    :returns: Always returns *self*, even in the case of an immutable
       :class:`FrozenMatrix` object, since the matrix object itself is never
       modified by :func:`m.foreach()`.
+
 
 .. py:function:: iter(m)
 
@@ -842,6 +878,7 @@ Iterating over matrices
    :rtype: Iterator
    :returns: An iterator over tuples of row and column indices.
 
+
 .. py:function:: m.map(func [, *args, **kwargs])
 
    Apply *func* to each cell in the matrix and store the return value of *func*
@@ -858,8 +895,10 @@ Iterating over matrices
       :class:`FrozenMatrix` objects return a modified copy of *self*.
 
 
+
 Common operations on matrices
 -----------------------------
+
 
 .. py:function:: value in m
 
@@ -875,9 +914,11 @@ Common operations on matrices
       numerical, so that you can always check whether a key is within the
       matrix's range by comparing the value to :obj:`m.shape`.
 
+
 .. py:function:: value not in m
 
    Equivalent to :code:`not value in m`.
+
 
 .. py:function:: m is other
 
@@ -891,15 +932,17 @@ Common operations on matrices
    if the method might have modified the matrix, whereas they will be the same
    (modified) object on :class:`Matrix` instances.
 
+
 .. py:function:: m == other
 
    Return :code:`True` if *m* and *other* are matrices of the same shape which
    contain the same values.
 
+
 .. py:function:: m.matadd(other)
 .. py:function:: m + other
 
-   Add two matrix objects.
+   Add the values of *other* to the values of *m*.
 
    The values of *other* are added to the values of *m* with the same key (row
    and column index). The *other* matrix must have the same shape as the matrix
@@ -923,10 +966,47 @@ Common operations on matrices
    :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
    :returns: Always returns a modified copy of *self*.
 
+
+.. py:function:: m.matmul(other)
+.. py:function:: m @ other
+
+   Multipy the matrices *m* and *other*.
+
+   The shape of *other* must be the inverse of the shape of *m*, e.g.
+   if :code:`m.shape` is :code:`(2, 5)`, then :code:`other.shape` must be
+   :code:`(5, 2)`. Matrix multiplication is not defined for matrices which do
+   not satisfy this condition and an attempt to multiply matrices with
+   incompatible shapes will raise a :obj:`ValueError`.
+
+   For an in-place variant see :func:`m.imatmul()`.
+
+   :param MatrixABC[~V] other: The :class:`Matrix` or :class:`FrozenMatrix` to
+   be multiplied with the matrix.
+   :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
+   :returns: Always returns a modified copy of *self*.
+
+
+.. py:function:: m.matsub(other)
+.. py:function:: m - other
+
+   Subtract the values of *other* from the values of *m*.
+
+   The values of *other* are subtracted from the values of *m* with the same key
+   (row and column index). The *other* matrix must have the same shape as the
+   matrix from which it is subtracted.
+
+   For an in-place variant see :func:`m.imatsub()`.
+
+   :param MatrixABC[~V] other: The :class:`Matrix` or :class:`FrozenMatrix` to
+      be subtracted from the matrix.
+   :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
+   :returns: Always returns a modified copy of *self*.
+
+
 .. py:function:: m.scaladd(scalar)
 .. py:function:: m + scalar
 
-   Add *scalar* to each cell of the matrix *m*.
+   Add *scalar* to each value of the matrix *m*.
 
    .. note::
 
@@ -947,31 +1027,52 @@ Common operations on matrices
       # 1 │ 5  6 │
       #   └      ┘
 
-   :param ~V scalar: The :class:`Matrix` or :class:`FrozenMatrix` to
-      be added to the matrix.
+   :param ~V scalar: The scalar value to be added to the matrix's values.
    :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
    :returns: Always returns a modified copy of *self*.
 
-.. py:function:: m.matmul(other)
-.. py:function:: m @ other
-
-   TO BE WRITTEN
 
 .. py:function:: m.scalmul(scalar)
 .. py:function:: m * scalar
 .. py:function:: scalar * m
 
-   TO BE WRITTEN
+   Multipy each value in *m* with *scalar*.
 
-.. py:function:: m.matsub(other)
-.. py:function:: m - other
+   For an in-place variant see :func:`m.iscalmul()`.
 
-   TO BE WRITTEN
+   :param ~V other: The scalar value to be multiplied with the matrix's values.
+   :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
+   :returns: Always returns a modified copy of *self*.
+
 
 .. py:function:: m.scalsub(scalar)
 .. py:function:: m - scalar
 
-   TO BE WRITTEN
+   Subtract *scalar* from each value of the matrix *m*.
+
+   .. note::
+
+      The :code:`-` operator cannot be used with scalars which are themselves
+      matrix objects (e.g. when subtracting a matrix from each matrix in a
+      matrix of matrices). Always use :func:`m.scalsub()` if there is a chance
+      that the scalar itself might be a matrix object.
+
+   For an in-place variant see :func:`m.iscalsub()`.
+
+   :Example:
+
+      >>> m = FrozenMatrix([[1, 2], [3, 4]], default=0)
+      >>> print(m - 1)
+      #     0  1
+      #   ┌      ┐
+      # 0 │ 0  1 │
+      # 1 │ 2  3 │
+      #   └      ┘
+
+   :param ~V scalar: The scalar value to be subtracted from the matrix's values.
+   :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
+   :returns: Always returns a modified copy of *self*.
+
 
 
 In-place matrix operations
@@ -999,15 +1100,29 @@ See the respective regular operation. The semantics are the same except for
 the result being stored directly in the matrix *m*.
 
 
+
 Converting matrices to other formats
 ------------------------------------
 
 .. py:function:: m.aslist(* [, by])
 
-   TO BE WRITTEN
+   Return the matrix's values as a list of lists.
+
+   When *by* is :code:`"row"` (the default), then the format of the returned
+   list of lists is the same as would have been used to construct the matrix
+   from a list of lists. If *by* is row, the list of lists returned is
+   essentially that which would have been used to construct the transpose of
+   the matrix.
 
    See also :func:`m.values()` which returns a flat list of the matrix's
    values.
+
+   :Example:
+      >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+      >>> m.aslist()
+      [[1, 2, 3], [4, 5, 6]]
+      >>> m.aslist(by="col")
+      [[1, 4], [2, 5], [3, 6]]
 
    :param RowColT by: One of the literals :code:`"row"` (the default) or
       :code:`"col"`, specifies whether the list of lists should be constructed
@@ -1018,7 +1133,16 @@ Converting matrices to other formats
 
 .. py:function:: m.asdict()
 
-   TO BE WRITTEN
+   Return the matrix's values as a dictionary of :code:`{key: value}` pairs.
+
+   Each key of the dictionary is a tuple of the row and column indices (a
+   :code:`(row, col)` pair), and the value the value of the corresponding cell
+   with that key.
+
+   :Example:
+      >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+      >>> m.asdict()
+      {(0, 0): 1, (0, 1): 2, (0, 2): 3, (1, 0): 4, (1, 1): 5, (1, 2): 6}
 
    :rtype: dict[tuple[int, int], ~T]
    :returns: Returns a dictionary where they keys are tuples of indices of the
@@ -1027,8 +1151,33 @@ Converting matrices to other formats
 
 .. py:function:: repr(m)
 
-   TO BE WRITTEN
+   Return a potentially parseable string representation of the matrix.
+
+   The returned repr gives the matrix's values in the form of a tuple of tuples.
+   The returned string itself is valid python which can be used to recreate the
+   matrix if and only if all the values in the matrix also have a repr which
+   produces valid python.
+
+   :Example:
+      >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+      >>> print(repr(m))
+      Matrix(((1, 2, 3),(4, 5, 6),), default=0)
+
+   :rtype: str
+   :returns: A string representation of the matrix object.
 
 .. py:function:: str(m)
 
-   TO BE WRITTEN
+   Return a string with a visual representation of the matrix.
+
+   :Example:
+   >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+   >>> print(str(m))
+        0  1  2
+      ┌         ┐
+    0 │ 1  2  3 │
+    1 │ 4  5  6 │
+      └         ┘
+
+   :rtype: str
+   :returns: A string displaying the matrix.
