@@ -9,7 +9,6 @@ packages = [{include = "matrices"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-more-itertools = "^9.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

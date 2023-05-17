@@ -39,9 +39,9 @@ class FrozenMatrix(MatrixABC[T]):
         new._transpose()
         return new
 
-    def resize(self, rows: int | tuple[int, int], cols: int | None) -> Self:
+    def resize(self, rows_or_shape: int | tuple[int, int], cols: int | None = None) -> Self:
         new = self.copy()
-        new._resize(rows, cols)
+        new._resize(rows_or_shape, cols)
         return new
 
     def flip(self, *, by: RowColT = "row") -> Self:

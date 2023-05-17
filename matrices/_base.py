@@ -3,14 +3,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from itertools import chain
-from more_itertools import chunked, matmul
-from typing import Any, Callable, Generic, Self, Iterator, Sequence, Sized, overload
-
+from typing import Any, Callable, Generic, Self, Iterator, Sequence, Sized, overload, cast
 from ._types import T, V, RowColT, IndexT
+from ._iterutils import chunked, matmul
 from ._formatter import format_matrix
 
 
-copyfunc: Callable[[T], T] = deepcopy
+copyfunc = deepcopy
 
 
 class MatrixABC(ABC, Generic[T]):
@@ -75,22 +74,22 @@ class MatrixABC(ABC, Generic[T]):
             inferred if not explicity specified.
         """
         # Make args/kwargs uniform (data, shape, default=default)
-        args: list[Any] = list(args)
+        arglist = list(args)
         if "data" in kwargs:
-            args.insert(0, kwargs["data"])
+            arglist.insert(0, kwargs["data"])
             del kwargs["data"]
         if "shape" in kwargs:
-            args.insert(1, kwargs["shape"])
+            arglist.insert(1, kwargs["shape"])
             del kwargs["shape"]
-        if "default" not in kwargs and isinstance(args[0], MatrixABC):
-            kwargs["default"] = args[0]._default
-        if len(args) < 1:
+        if "default" not in kwargs and isinstance(arglist[0], MatrixABC):
+            kwargs["default"] = arglist[0]._default
+        if len(arglist) < 1:
             raise TypeError("Expected at least 1 argument, 0 given")
-        if len(args) > 2:
+        if len(arglist) > 2:
             raise TypeError("Unexpected argument, expected at most 2 non-keyword arguments")
         # Extract values for data, shape and default
-        data = args[0]
-        if len(args) < 2:
+        data = arglist[0]
+        if len(arglist) < 2:
             if isinstance(data, MatrixABC):
                 shape = data._shape
             elif isinstance(data, Sequence) and len(data) == 0:
@@ -100,7 +99,7 @@ class MatrixABC(ABC, Generic[T]):
             else:
                 raise TypeError("Missing required argument 'shape'")
         else:
-            shape = args[1]
+            shape = arglist[1]
         if "default" in kwargs:
             default = kwargs["default"]
             del kwargs["default"]
@@ -157,6 +156,7 @@ class MatrixABC(ABC, Generic[T]):
         self._default = default
         self._shape = shape
         self._data = []
+        data = list(data)
         if len(data) < self._shape[0]:
             for _ in range(len(data), self._shape[0]):
                 data.append([self._default] * self._shape[1])
@@ -176,7 +176,8 @@ class MatrixABC(ABC, Generic[T]):
         raw_seq = list(data)
         if len(raw_seq) < number_of_cells:
             raw_seq.extend([self._default] * (number_of_cells - len(raw_seq)))
-        self._data = list(chunked(raw_seq[0:number_of_cells], self._shape[1]))
+        x = raw_seq[0:number_of_cells]
+        self._data = list(chunked(x, self._shape[1]))
 
     # HELPER FUNCTIONS
 
@@ -194,7 +195,7 @@ class MatrixABC(ABC, Generic[T]):
         self._rowrange = range(0, self._shape[0])
         self._colrange = range(0, self._shape[1])
 
-    def _check_shape(self, shape: tuple[int, int]):
+    def _check_shape(self, shape: tuple[int, int]) -> None:
         """Checks whether a shape tuple is valid in terms of values."""
         if shape[0] < 0:
             raise ValueError("Row count cannot be negative")
@@ -227,7 +228,8 @@ class MatrixABC(ABC, Generic[T]):
         """
         if not isinstance(col, (int, tuple, slice)):
             raise TypeError(
-                f"Column index must be of type int | slice | tuple[int, ...], not {type(col)!r} given"
+                "Column index must be of type int | slice | tuple[int, ...], "
+                f"not {type(col)!r} given"
             )
         if isinstance(col, int) and (col == self._shape[1] or abs(col) > self._shape[1]):
             raise IndexError("Column index out of range")
@@ -237,7 +239,7 @@ class MatrixABC(ABC, Generic[T]):
             if any(x == self._shape[1] or abs(x) > self._shape[1] for x in col):
                 raise IndexError("At least one column index out of range in index tuple")
 
-    def _rowtoindices(self, index: IndexT) -> tuple[int]:
+    def _rowtoindices(self, index: IndexT) -> tuple[int, ...]:
         """Converts an integer or a slice to a tuple of row indices.
 
         :param intorslice: An integer or `slice` object referring to one or
@@ -263,7 +265,7 @@ class MatrixABC(ABC, Generic[T]):
             index.step or 1
         ))
 
-    def _coltoindices(self, index: IndexT) -> tuple[int]:
+    def _coltoindices(self, index: IndexT) -> tuple[int, ...]:
         """Converts an integer or a slice to a tuple of column indices.
 
         :param intorslice: An integer or `slice` object referring to one or
@@ -348,7 +350,8 @@ class MatrixABC(ABC, Generic[T]):
 
     def _resize(self, rows: int | tuple[int, int], cols: int | None = None) -> None:
         """Resizes the internal data to the specified shape, with origin (0, 0)."""
-        if isinstance(rows, Sequence) and len(rows) == 2 and cols is None:
+        if cols is None and isinstance(rows, Sequence) and len(rows) == 2:
+            rows = cast(tuple[int, int], rows)  # For whatever reason mypy thinks rows is <nothing>
             cols = rows[1]
             rows = rows[0]
         elif not isinstance(rows, int) or not isinstance(cols, int):
@@ -374,15 +377,17 @@ class MatrixABC(ABC, Generic[T]):
         self._calculate_helpers()
 
     @overload
-    def resize(self, shape: tuple[int, int], /) -> Self:
+    @abstractmethod
+    def resize(self, rows_or_shape: tuple[int, int]) -> Self:
         ...
 
     @overload
-    def resize(self, rows: int, cols: int) -> Self:
+    @abstractmethod
+    def resize(self, rows_or_shape: int, cols: int) -> Self:
         ...
 
     @abstractmethod
-    def resize(self, rows: int | tuple[int, int], cols: int | None) -> Self:
+    def resize(self, rows_or_shape: int | tuple[int, int], cols: int | None = None) -> Self:
         """Grows or shrinks a matrix.
 
         Grows or shrinks a matrix depending on whether the new shape supplied
@@ -776,7 +781,7 @@ class MatrixABC(ABC, Generic[T]):
         """Matrix-multiplies internal data with *other* matrix."""
         if self._shape != (other._shape[1], other._shape[0]):
             raise ValueError("Shape of *other* matrix not compatible for matrix multiplication")
-        self._data = list(matmul(self._data, other._data))  # type: ignore
+        self._data = list(matmul(self._data, other._data))
         self._shape = (self._shape[0], other._shape[1])
         self._calculate_helpers()
 
@@ -941,7 +946,7 @@ class MatrixABC(ABC, Generic[T]):
             value of each cell as the matrix is being iterated over).
         :param args: Additional positional arguments to be passed to *func*.
         :param kwargs: Additional keyword arguments to be passed to *func*.
-        :returns: its own :class:`Matrix` instance if mutable, 
+        :returns: its own :class:`Matrix` instance if mutable,
             a copy of the :class:`FrozenMatrix` instance if immutable.
         """
         raise NotImplementedError()
@@ -1139,7 +1144,7 @@ class MatrixABC(ABC, Generic[T]):
     def _getslice(self, row: IndexT, col: IndexT) -> Self:
         rows = self._rowtoindices(row)
         cols = self._coltoindices(col)
-        return self.__class__(
+        return self.__class__(  # type: ignore
             [[self._data[r][c] for c in cols] for r in rows],
             default=self._default
         )
@@ -1153,51 +1158,63 @@ class MatrixABC(ABC, Generic[T]):
         rows = self._rowtoindices(row)
         cols = self._coltoindices(col)
         cells = [(r, c) for r in rows for c in cols]
-        if not isinstance(values, (Sequence, MatrixABC)):
+        flat_values: Sequence[T]
+        if isinstance(values, MatrixABC):
+            flat_values = values.values()
+        elif isinstance(values, Sequence):
+            if len(values) > 0 and all(isinstance(x, Sequence) for x in values):
+                values = cast(Sequence[Sequence[T]], values)
+                flat_values = list(chain(*values))
+            else:
+                values = cast(Sequence[T], values)
+                flat_values = values
+        else:
             raise TypeError(
                 "Argument 'values' must be of type Sequence[T], "
                 f"Sequence[Sequence[T]], or MatrixT, not {type(values)}"
             )
-        if len(values) < len(cells) and len(values) > 0 and isinstance(values[0], Sequence):
-            values = list(chain(*values))
-        if len(values) != len(cells):
-            raise ValueError(f"Attempting to assign {len(values)} values to {len(cells)} cells")
-        for (row, col), value in zip(cells, values, strict=True):
+        if len(flat_values) != len(cells):
+            raise ValueError(
+                f"Attempting to assign {len(flat_values)} values to {len(cells)} cells"
+            )
+        for (row, col), value in zip(cells, flat_values, strict=True):
             self._setitem(row, col, value)
 
     @overload
-    def get(self, key: tuple[int, int]) -> T:
+    def get(self, row_or_key: tuple[int, int]) -> T:
         ...
 
     @overload
-    def get(self, key: tuple[slice | tuple[int, ...], int]) -> Self:
+    def get(self, row_or_key: tuple[slice | tuple[int, ...], int]) -> Self:
         ...
 
     @overload
-    def get(self, key: tuple[int, slice | tuple[int, ...]]) -> Self:
+    def get(self, row_or_key: tuple[int, slice | tuple[int, ...]]) -> Self:
         ...
 
     @overload
-    def get(self, key: tuple[slice | tuple[int, ...], slice | tuple[int, ...]]) -> Self:
+    def get(self, row_or_key: tuple[slice | tuple[int, ...], slice | tuple[int, ...]]) -> Self:
         ...
 
     @overload
-    def get(self, row: int, col: int) -> T:
+    def get(self, row_or_key: int, col: int) -> T:
         ...
 
     @overload
-    def get(self, row: slice | tuple[int, ...], col: int) -> Self:
+    def get(self, row_or_key: slice | tuple[int, ...], col: int) -> Self:
         ...
 
     @overload
-    def get(self, row: int, col: slice | tuple[int, ...]) -> Self:
+    def get(self, row_or_key: int, col: slice | tuple[int, ...]) -> Self:
         ...
 
     @overload
-    def get(self, row: slice | tuple[int, ...], col: slice | tuple[int, ...]) -> Self:
+    def get(self, row_or_key: slice | tuple[int, ...], col: slice | tuple[int, ...]) -> Self:
         ...
 
-    def get(self, row: IndexT, col: IndexT | None = None) -> T | Self:
+    def get(self,
+            row_or_key: IndexT | tuple[IndexT, IndexT],
+            col: IndexT | None = None) -> T | Self:
         """Return an item or submatrix based on row and colum indices.
 
         Can be invoked as either :code:`get((row, col))` or
@@ -1208,21 +1225,34 @@ class MatrixABC(ABC, Generic[T]):
         *rows*, *cols* or both are slice objects or tuples of integers with
         several row/column indices.
 
-        :param row: The row index or row indices (as a tuple or slice) of the
-            row(s) to be returned.
+        :param row_or_key: The row index or row indices (as a tuple or slice)
+            of the row(s) to be returned, or a tuple with :code:`(row, col)`
+            argument values if *col* is omitted.
         :param col: The column index or column indices (as a tuple or slice) of
             the column(s) to be returned.
         :returns: The value of the matrix cell if both *row* and *col* are
             integers refering to a single cell, otherwise a submatrix covering
             the are selected by *row* and *col*.
         """
+        row = row_or_key
         if col is None and isinstance(row, tuple) and len(row) == 2:
             (row, col) = row
-        if not isinstance(row, (slice, int, tuple)) or not isinstance(col, (slice, int, tuple)):
+        if not (
+            (
+                isinstance(row, (slice, int))
+                or (isinstance(row, tuple) and all(isinstance(x, int) for x in row))
+            )
+            and
+            (
+                isinstance(col, (slice, int))
+                or (isinstance(col, tuple) and all(isinstance(x, int) for x in col))
+            )
+        ):
             raise TypeError(
                 "Matrix indices must be tuples of type (int | slice | tuple[int, ...], int | slice "
                 f"| tuple[int, ...]), not ({type(row)}, {type(col)})"
             )
+        row = cast(slice | int | tuple[int, ...], row)  # inference from logic above fails here
         if isinstance(row, (slice, tuple)) or isinstance(col, (slice, tuple)):
             return self._getslice(row, col)
         return self._getitem(row, col)
@@ -1259,7 +1289,7 @@ class MatrixABC(ABC, Generic[T]):
             if all(list(other[r]) == self._data[r] for r in range(0, len(other))):
                 return True
             return False
-        return self._data == other
+        return bool(self._data == other)
 
     def __bool__(self) -> bool:
         if self._shape[0] == 0 or self._shape[1] == 0:
@@ -1271,15 +1301,15 @@ class MatrixABC(ABC, Generic[T]):
     def __len__(self) -> int:
         return self._shape[0] * self._shape[1]
 
-    def __contains__(self, item: T):
+    def __contains__(self, item: T) -> bool:
         return any(item in self._data[r] for r in self._rowrange)
 
-    def __add__(self, other: MatrixABC[V] | T) -> Self | MatrixABC[V]:
+    def __add__(self, other: MatrixABC[V] | V) -> Self | MatrixABC[V]:
         if isinstance(other, MatrixABC):
             return self.matadd(other)
         return self.scaladd(other)
 
-    def __sub__(self, other: MatrixABC[V] | T) -> Self | MatrixABC[V]:
+    def __sub__(self, other: MatrixABC[V] | V) -> Self | MatrixABC[V]:
         if isinstance(other, MatrixABC):
             return self.matsub(other)
         return self.scalsub(other)

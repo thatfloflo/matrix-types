@@ -102,7 +102,7 @@ class Matrix(MatrixABC[T]):
         self._transpose()
         return self
 
-    def resize(self, rows: int | tuple[int, int], cols: int | None) -> Self:
+    def resize(self, rows: int | tuple[int, int], cols: int | None = None) -> Self:
         self._resize(rows, cols)
         return self
 
@@ -255,7 +255,7 @@ class Matrix(MatrixABC[T]):
         return self._shape
 
     @shape.setter
-    def shape(self, shape: tuple[int, int]):
+    def shape(self, shape: tuple[int, int]) -> None:
         self.resize(shape)
 
     @property
@@ -322,12 +322,12 @@ class Matrix(MatrixABC[T]):
 
     # DUNDER METHODS
 
-    def __iadd__(self, other: MatrixABC[V] | T) -> Self | Matrix[V]:
+    def __iadd__(self, other: MatrixABC[V] | V) -> Self | Matrix[V]:
         if isinstance(other, MatrixABC):
             return self.imatadd(other)
         return self.iscaladd(other)
 
-    def __isub__(self, other: MatrixABC[V] | T) -> Self | Matrix[V]:
+    def __isub__(self, other: MatrixABC[V] | V) -> Self | Matrix[V]:
         if isinstance(other, MatrixABC):
             return self.imatsub(other)
         return self.iscalsub(other)

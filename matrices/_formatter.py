@@ -8,7 +8,7 @@ __all__ = [
     "FancyASCIIFormat",
     "MatrixFormat",
     "HTMLFormat",
-    "format"
+    "format_matrix"
 ]
 
 
