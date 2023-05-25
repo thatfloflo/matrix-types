@@ -6,7 +6,7 @@ from itertools import chain
 from typing import Any, Callable, Generic, Self, Iterator, Sequence, Sized, overload, cast
 from ._types import T, V, RowColT, IndexT
 from ._iterutils import chunked, matmul
-from ._formatter import format_matrix
+from .formatter import DefaultFormatter
 
 
 copyfunc = deepcopy
@@ -1271,7 +1271,7 @@ class MatrixABC(ABC, Generic[T]):
     # DUNDER METHODS
 
     def __str__(self) -> str:
-        return format_matrix(self._data)
+        return DefaultFormatter(self)
 
     def __repr__(self) -> str:
         return "".join((
