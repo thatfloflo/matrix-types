@@ -1,10 +1,9 @@
 import pytest  # noqa: F401
 from matrices import Matrix
 from common import (
-    CommonInitTests, CommonGetterTests, CommonShapeTests,
-    CommonRowOperationTests, CommonColumnOperationTests,
-    CommonDataAccessTests, CommonOperationTests,
-    CommonDunderTests
+    CommonTestBase, CommonInitTests, CommonGetterTests, CommonShapeTests,
+    CommonRowOperationTests, CommonColumnOperationTests, CommonDataAccessTests,
+    CommonOperationTests, CommonDunderTests
 )
 
 
@@ -314,3 +313,104 @@ class TestDunders(CommonDunderTests):
             incompatible @= m
         assert m.aslist() == [[30, 36, 42], [66, 81, 96], [102, 126, 150]]
         assert incompatible.aslist() == [[2, 2, 2], [2, 2, 2]]
+
+
+class TestSetters(CommonTestBase):
+
+    MatrixClass = Matrix
+
+    def test_cell_assignment(self):
+        """Test single cell value assignments."""
+        m = self._make_2x3_test_matrix()
+        # 1, 2, 3
+        # 4, 5, 6
+        m[0, 0] = 99
+        assert m[0, 0] == 99
+        m[1, 1] = "x"
+        assert m[1, 1] == "x"
+        m[1, 2] = (1, 2, 3)
+        assert m[1, 2] == (1, 2, 3)
+        m[(1, 0)] = 10
+        assert m[1, 0] == 10
+        with pytest.raises(TypeError):
+            m[9] = 0
+
+    def test_cell_set(self):
+        """Test single cell set() method."""
+        m = self._make_2x3_test_matrix()
+        m.set(0, 0, 99)
+        assert m[0, 0] == 99
+        m.set(1, 1, "x")
+        assert m[1, 1] == "x"
+        m.set(1, 2, (1, 2, 3))
+        assert m[1, 2] == (1, 2, 3)
+        m.set((1, 0), 10)
+        assert m[1, 0] == 10
+        m.set(1, 0, None)
+        assert m[1, 0] is None
+        with pytest.raises(TypeError):
+            m.set(1, 0)  # No value provided
+        with pytest.raises(TypeError):
+            m.set((1, 0))  # No value provided
+
+    def test_slice_assignment_matrix(self):
+        """Test slice assignment with matrices."""
+        m = self._make_2x3_test_matrix()
+        t = Matrix([], (2, 3), default=1)
+        m[:, :] = t
+        assert m == t
+        m = self._make_2x3_test_matrix()
+        m[0, :] = t[0, :]
+        assert m[0, 0] == 1
+        assert m[0, 1] == 1
+        assert m[0, 2] == 1
+        assert m[1, 0] == 4
+        assert m[1, 1] == 5
+        assert m[1, 2] == 6
+        m = self._make_2x3_test_matrix()
+        m[:, 1] = Matrix([[1], [1]], default=1)
+        assert m[0, 0] == 1
+        assert m[0, 1] == 1
+        assert m[0, 2] == 3
+        assert m[1, 0] == 4
+        assert m[1, 1] == 1
+        assert m[1, 2] == 6
+        with pytest.raises(ValueError):
+            m[:, 1] = Matrix([], (0, 0), default=0)
+        with pytest.raises(ValueError):
+            m[:, 1] = t
+
+    def test_slice_assignment_sequence(self):
+        """Test slice assignment with sequences."""
+        t = Matrix([], (2, 3), default=1)
+        m = self._make_2x3_test_matrix()
+        m[:, :] = [1, 1, 1, 1, 1, 1]
+        assert m == t
+        m = self._make_2x3_test_matrix()
+        m[:, :] = [[1, 1, 1], [1, 1, 1]]
+        assert m == t
+        m = self._make_2x3_test_matrix()
+        m[0, :] = 1, 1, 1
+        m[1, :] = 2, 2, 2
+        assert m[0, 0] == 1
+        assert m[0, 1] == 1
+        assert m[0, 2] == 1
+        assert m[1, 0] == 2
+        assert m[1, 1] == 2
+        assert m[1, 2] == 2
+        m = self._make_2x3_test_matrix()
+        m[:, 1] = [(1, ), (1, )]
+        assert m[0, 0] == 1
+        assert m[0, 1] == 1
+        assert m[0, 2] == 3
+        assert m[1, 0] == 4
+        assert m[1, 1] == 1
+        assert m[1, 2] == 6
+        with pytest.raises(TypeError):
+            m[:, 1] = 1
+        with pytest.raises(TypeError):
+            m[0, :] = 1
+        with pytest.raises(ValueError):
+            m[:, 1] = []
+        with pytest.raises(ValueError):
+            m[:, 1] = [0, 1, 2, 3, 4, 5]

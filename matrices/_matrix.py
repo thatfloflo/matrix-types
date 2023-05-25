@@ -1,9 +1,9 @@
 """Mutable 2-dimensional matrix type."""
 from __future__ import annotations
-from typing import Any, Callable, Self, Sequence, overload, cast
+from typing import Any, Callable, Self, Sequence, overload, cast, Literal
 
 from ._base import MatrixABC
-from ._types import T, V, RowColT, IndexT
+from ._types import T, V, RowColT, IndexT, NotGiven, Sentinel
 
 
 class Matrix(MatrixABC[T]):
@@ -290,21 +290,49 @@ class Matrix(MatrixABC[T]):
     def set(
             self,
             arg1: IndexT | tuple[IndexT, IndexT],
-            arg2: IndexT | T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | None = None,
-            arg3: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | None = None,
+            arg2: IndexT | T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | Sentinel = NotGiven,
+            arg3: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | Sentinel = NotGiven,
             /,
             ) -> Self:
         """
         (TO BE WRITTEN)
         """
-        if arg3 is None:
+        if arg3 is NotGiven:
             if not isinstance(arg1, Sequence):
-                raise TypeError(f"Argument 'index' must be of type tuple[int, int], not {type(arg1)}")
+                raise TypeError(
+                    "Argument '_key' must be of type tuple[int | slice | tuple[int, ...], "
+                    f"int | slice | tuple[int, ...]], not {type(arg1)}"
+                )
             if len(arg1) != 2:
-                raise TypeError(f"Argument 'index' must be exactly of length 2, got sequence of length {len(arg1)}")
+                raise ValueError(
+                    "Argument '_key' must be exactly of length 2, got sequence of length "
+                    f"{len(arg1)}"
+                )
+            if arg2 is NotGiven:
+                raise TypeError("Missing required positional argument '_values'")
             row, col = arg1
             values = arg2
         else:
+            if arg2 is NotGiven:
+                raise TypeError("Missing required positional argument '_col'")
+            if (not isinstance(arg1, (int, slice))
+                and not (isinstance(arg1, tuple)
+                         and len(arg1) > 0
+                         and all(isinstance(i, int) for i in arg1))):
+                raise TypeError(
+                    "Argument '_row' must be of type int | slice | tuple[int, ...], "
+                    f"not {type(arg1)}"
+                )
+            if (not isinstance(arg2, (int, slice))
+                and not (isinstance(arg2, tuple)
+                         and len(arg2) > 0
+                         and all(isinstance(i, int) for i in arg2))):
+                raise TypeError(
+                    "Argument '_col' must be of type int | slice | tuple[int, ...], "
+                    f"not {type(arg2)}"
+                )
+            if arg3 is NotGiven:
+                raise TypeError("Missing required positional argument '_values'")
             row = arg1  # type: ignore # @FIXME
             col = arg2  # type: ignore # @FIXME
             values = arg3
