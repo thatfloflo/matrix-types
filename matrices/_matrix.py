@@ -1,6 +1,6 @@
 """Mutable 2-dimensional matrix type."""
 from __future__ import annotations
-from typing import Any, Callable, Self, Sequence, overload
+from typing import Any, Callable, Self, Sequence, overload, cast
 
 from ._base import MatrixABC
 from ._types import T, V, RowColT, IndexT
@@ -269,30 +269,33 @@ class Matrix(MatrixABC[T]):
     # DATA GETTERS AND SETTERS
 
     @overload
-    def set(self, index: tuple[IndexT, IndexT], values: Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]]) -> T | Self:
+    def set(
+            self,
+            _key: tuple[IndexT, IndexT],
+            _values: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]],
+            /,
+            ) -> Self:
         ...
 
     @overload
-    def set(self, row: IndexT, col: IndexT, values: Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]]) -> T | Self:
+    def set(
+            self,
+            _row: IndexT,
+            _col: IndexT,
+            _values: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]],
+            /,
+            ) -> Self:
         ...
 
     def set(
             self,
-            arg1: tuple[IndexT, IndexT] | IndexT,
-            arg2: IndexT | T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]],
-            arg3: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | None = None
-            ) -> T | Self:
+            arg1: IndexT | tuple[IndexT, IndexT],
+            arg2: IndexT | T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | None = None,
+            arg3: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]] | None = None,
+            /,
+            ) -> Self:
         """
-        >>> from matrices import Matrix
-        >>> m = Matrix([[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15],[16,17,18,19,20]], default=0)
-        >>> print(m[1:3, 2:4])
-                0   1
-              ┌        ┐
-            0 │  8   9 │
-            1 │ 13  14 │
-              └        ┘
-        >>> m[1:3, 2:4] = [-8, -9, -13, -14]
-        >>> print(m)
+        (TO BE WRITTEN)
         """
         if arg3 is None:
             if not isinstance(arg1, Sequence):
@@ -302,8 +305,8 @@ class Matrix(MatrixABC[T]):
             row, col = arg1
             values = arg2
         else:
-            row = arg1
-            col = arg2
+            row = arg1  # type: ignore # @FIXME
+            col = arg2  # type: ignore # @FIXME
             values = arg3
         if not isinstance(row, (slice, int, tuple)) or not isinstance(col, (slice, int, tuple)):
             raise TypeError(
@@ -311,8 +314,17 @@ class Matrix(MatrixABC[T]):
                 f"| tuple[int, ...]), not ({type(row)}, {type(col)})"
             )
         if isinstance(row, (slice, tuple)) or isinstance(col, (slice, tuple)):
-            return self._setslice(row, col, values)
-        return self._setitem(row, col, values)
+            if not isinstance(values, (Sequence, MatrixABC)):
+                raise TypeError(
+                    "Values passed for matrix slice assignment must be of type Sequence or "
+                    f"MatrixABC, not {type(values)}"
+                )
+            values_ = cast(Sequence[T] | Sequence[Sequence[T]] | MatrixABC[T], values)
+            self._setslice(row, col, values_)
+        else:
+            value_ = cast(T, values)
+            self._setitem(row, col, value_)
+        return self
 
     def __setitem__(self, key: tuple[IndexT, IndexT], value: T | Sequence[T] | Sequence[Sequence[T] | MatrixABC[T]]) -> None:
         self.set(key, value)

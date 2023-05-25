@@ -347,7 +347,9 @@ def format_matrix(
     colheaders = _preformat_colheaders(colheaders, colrange, format)
     rowheaders = _preformat_rowheaders(rowheaders, rowrange, format)
     data = _preformat_cells(data, colrange, rowrange, format)
-    data, colheaders, rowheaders, cornerhead = _align_columns(data, colheaders, rowheaders, cornerhead, colrange, rowrange, format)
+    data, colheaders, rowheaders, cornerhead = _align_columns(
+        data, colheaders, rowheaders, cornerhead, colrange, rowrange, format
+    )
     return _build_string(data, colheaders, rowheaders, cornerhead, colrange, rowrange, format).strip("\n")
 
 
@@ -464,7 +466,7 @@ def _align_columns(
     return (data, colheaders, rowheaders, cornerhead)
 
 
-def _build_string(
+def _build_string(    # noqa: C901
         data: list[list[str]],
         colheaders: list[str],
         rowheaders: list[str],

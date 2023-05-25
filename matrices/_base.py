@@ -50,7 +50,7 @@ class MatrixABC(ABC, Generic[T]):
     def __init__(self, data: Sequence[T], shape: tuple[int, int], *, default: T):
         ...
 
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, *args: Any, **kwargs: Any):  # noqa: C901
         """Initialise a new Matrix/FrozenMatrix instance.
 
         :param MatrixABC[T] | Sequence[T] | Sequence[Sequence[T]] data: The
