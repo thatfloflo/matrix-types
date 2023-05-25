@@ -8,10 +8,7 @@ Requirements
 |project| should run on any machine that runs `Python <https://python.org>`_
 version 3.10 or newer.
 
-There are no other requirements, and only a single dependency
-(`more-itertools <https://pypi.org/project/more-itertools/>`_),
-which will be installed automatically if you use :command:`pip` as shown
-below.
+There are no other requirements, and the package has no external dependencies.
 
 
 Installation
