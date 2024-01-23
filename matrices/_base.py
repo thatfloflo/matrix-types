@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from itertools import chain
-from typing import Any, Callable, Generic, Self, Iterator, Sequence, Sized, overload, cast
+from typing import Any, Callable, Generic, Self, Iterator, Sequence, overload, cast
 from ._types import T, V, RowColT, IndexT, Sentinel, NotGiven
 from ._iterutils import chunked, matmul, isseqseq
 from .formatter import DefaultFormatter
@@ -93,7 +93,8 @@ class MatrixABC(ABC, Generic[T]):
             del kwargs["headers"]
         if len(kwargs) > 0:
             raise TypeError(
-                f"{self.__class__.__name__}() got an unexpected keyword argument '{list(kwargs)[0]}'"
+                f"{self.__class__.__name__}() got an unexpected keyword argument "
+                f"'{list(kwargs)[0]}'"
             )
         # Consume positional arguments
         arglist = list(args)
@@ -127,7 +128,8 @@ class MatrixABC(ABC, Generic[T]):
             if isinstance(data, Sequence) and (len(data) == 0 or isinstance(data[0], Sequence)):
                 max_args = 4
             raise TypeError(
-                f"{self.__class__.__name__}() expected at most {max_args} arguments but {n_args} were given"
+                f"{self.__class__.__name__}() expected at most {max_args} arguments "
+                f"but {n_args} were given"
             )
         if len(missing_args) == 1:
             raise TypeError(
@@ -138,7 +140,8 @@ class MatrixABC(ABC, Generic[T]):
             tmp.insert(-1, "and")
             tmp_ = " ".join(tmp) if len(missing_args) == 2 else ", ".join(tmp)
             raise TypeError(
-                f"{self.__class__.__name__}() missing {len(missing_args)} required arguments: {tmp_}"
+                f"{self.__class__.__name__}() missing {len(missing_args)} required arguments: "
+                f"{tmp_}"
             )
         # type check arguments
         if data is NotGiven or not isinstance(data, (Sequence, MatrixABC)):
@@ -146,7 +149,9 @@ class MatrixABC(ABC, Generic[T]):
                 f"argument 'data' must be of type MatrixABC | Sequence, {type(data)} given"
             )
         if shape is not NotGiven:
-            if not (isinstance(shape, tuple) and len(shape) == 2 and all(isinstance(i, int) for i in shape)):
+            if not (isinstance(shape, tuple)
+                    and len(shape) == 2
+                    and all(isinstance(i, int) for i in shape)):
                 raise TypeError(
                     f"argument 'shape' must be of type tuple[int, int], {type(shape)} given"
                 )
@@ -172,7 +177,9 @@ class MatrixABC(ABC, Generic[T]):
         else:  # must be 'Sequence'
             data = cast(Sequence[T], data)
             if isinstance(shape, Sentinel):
-                raise TypeError(f"argument 'shape' must be of type tuple[int, int], {type(shape)} given")
+                raise TypeError(
+                    f"argument 'shape' must be of type tuple[int, int], {type(shape)} given"
+                )
             self._init_from_sequence(data, shape, default, headers)
         # Calculate helpers
         self._calculate_helpers()
@@ -180,7 +187,11 @@ class MatrixABC(ABC, Generic[T]):
         # if self._shape != shape:
         #    self._resize(shape)
 
-    def _init_from_matrix(self, data: MatrixABC[T], default: T | Sentinel = NotGiven, headers: bool = False) -> None:
+    def _init_from_matrix(
+            self,
+            data: MatrixABC[T],
+            default: T | Sentinel = NotGiven,
+            headers: bool = False) -> None:
         """Initialise Matrix from another Matrix."""
         self._data = copyfunc(data._data)
         self._shape = copyfunc(data._shape)
@@ -1094,6 +1105,7 @@ class MatrixABC(ABC, Generic[T]):
 
         By default, the returned list will be sequenced row by row.
         For example, the matrix::
+
                 0  1  2
               ┌         ┐
             0 │ 1  2  3 │

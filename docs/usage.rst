@@ -981,7 +981,7 @@ Common operations on matrices
    For an in-place variant see :func:`m.imatmul()`.
 
    :param MatrixABC[~V] other: The :class:`Matrix` or :class:`FrozenMatrix` to
-   be multiplied with the matrix.
+      be multiplied with the matrix.
    :rtype: Self | Matrix[~V] | FrozenMatrix[~V]
    :returns: Always returns a modified copy of *self*.
 
@@ -1171,13 +1171,13 @@ Converting matrices to other formats
    Return a string with a visual representation of the matrix.
 
    :Example:
-   >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
-   >>> print(str(m))
-        0  1  2
-      ┌         ┐
-    0 │ 1  2  3 │
-    1 │ 4  5  6 │
-      └         ┘
+      >>> m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
+      >>> print(str(m))
+           0  1  2
+         ┌         ┐
+       0 │ 1  2  3 │
+       1 │ 4  5  6 │
+         └         ┘
 
    :rtype: str
    :returns: A string displaying the matrix.
