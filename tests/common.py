@@ -18,32 +18,35 @@ class CommonInitTests(CommonTestBase):
     def test_init_from_seqseq(self):
         """Initialise with sequence of sequences."""
         self.MatrixClass([[1, 2, 3], [4, 5, 6]], default=0)
-        self.MatrixClass([[1, 2, 3], [4, 5, 6]], shape=(2, 3), default=0)
-        self.MatrixClass([[1, 2, 3], [4, 5, 6]], (2, 3), default=0)
+        self.MatrixClass([[1, 2, 3], [4, 5, 6]], 0)
         with pytest.raises(TypeError):
             self.MatrixClass([[1, 2, 3], [4, 5, 6]])
         with pytest.raises(TypeError):
             self.MatrixClass([[1, 2, 3], [4, 5, 6]], shape=(2, 3))
         with pytest.raises(TypeError):
-            self.MatrixClass([[1, 2, 3], [4, 5, 6]], (2, 3))
-        with pytest.raises(TypeError):
             self.MatrixClass([[1, 2, 3], [4, 5, 6]], (2, 3), 0)
+        with pytest.raises(TypeError):
+            self.MatrixClass([[1, 2, 3], [4, 5, 6]], headers=True)
 
     def test_init_from_matrix(self):
         """Initialise from existing Matrix."""
         m = Matrix([[1, 2, 3], [4, 5, 6]], default=0)
         self.MatrixClass(m)
         self.MatrixClass(m, default=-1)
-        self.MatrixClass(m, shape=(3, 2), default=-1)
-        self.MatrixClass(m, (3, 2), default=-1)
+        with pytest.raises(TypeError):
+            print(self.MatrixClass(m, (3, 2), default=-1))
+        with pytest.raises(TypeError):
+            self.MatrixClass(m, shape=(3, 2), default=-1)
 
     def test_init_from_frozenmatrix(self):
         """Initialise from existing FrozenMatrix."""
         m = FrozenMatrix([[1, 2, 3], [4, 5, 6]], default=0)
         self.MatrixClass(m)
         self.MatrixClass(m, default=-1)
-        self.MatrixClass(m, shape=(3, 2), default=-1)
-        self.MatrixClass(m, (3, 2), default=-1)
+        with pytest.raises(TypeError):
+            print(self.MatrixClass(m, (3, 2), default=-1))
+        with pytest.raises(TypeError):
+            self.MatrixClass(m, shape=(3, 2), default=-1)
 
     def init_from_flat_sequence(self):
         """Initialise from a flat sequence."""

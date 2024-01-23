@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from itertools import chain
 from typing import Any, Callable, Generic, Self, Iterator, Sequence, Sized, overload, cast
-from ._types import T, V, RowColT, IndexT
-from ._iterutils import chunked, matmul
+from ._types import T, V, RowColT, IndexT, Sentinel, NotGiven
+from ._iterutils import chunked, matmul, isseqseq
 from .formatter import DefaultFormatter
 
 
@@ -23,31 +23,31 @@ class MatrixABC(ABC, Generic[T]):
     _colrange: range
 
     @overload
-    def __init__(self, data: Sequence[Sequence[T]], *, default: T):
+    def __init__(
+        self,
+        data: MatrixABC[T],
+        default: T | Sentinel = NotGiven,
+        headers: bool = False
+    ):
         ...
 
     @overload
-    def __init__(self, data: Sequence[Sequence[T]], shape: tuple[int, int], *, default: T):
+    def __init__(
+        self,
+        data: Sequence[Sequence[T]],
+        default: T,
+        headers: bool = False
+    ):
         ...
 
     @overload
-    def __init__(self, data: MatrixABC[T]):
-        ...
-
-    @overload
-    def __init__(self, data: MatrixABC[T], *, default: T):
-        ...
-
-    @overload
-    def __init__(self, data: MatrixABC[T], shape: tuple[int, int]):
-        ...
-
-    @overload
-    def __init__(self, data: MatrixABC[T], shape: tuple[int, int], *, default: T):
-        ...
-
-    @overload
-    def __init__(self, data: Sequence[T], shape: tuple[int, int], *, default: T):
+    def __init__(
+        self,
+        data: Sequence[T],
+        shape: tuple[int, int],
+        default: T,
+        headers: bool = False
+    ):
         ...
 
     def __init__(self, *args: Any, **kwargs: Any):  # noqa: C901
@@ -73,88 +73,127 @@ class MatrixABC(ABC, Generic[T]):
             unless *data* is of type `MatrixT`, in which case it will be
             inferred if not explicity specified.
         """
-        # Make args/kwargs uniform (data, shape, default=default)
-        arglist = list(args)
+        data: MatrixABC[T] | Sequence[T] | Sequence[Sequence[T]] | Sentinel = NotGiven
+        shape: tuple[int, int] | Sentinel = NotGiven
+        default: T | Sentinel = NotGiven
+        headers: bool | Sentinel = NotGiven
+        n_args = len(kwargs) + len(args)
+        # Consume keyword arguments first
         if "data" in kwargs:
-            arglist.insert(0, kwargs["data"])
+            data = kwargs["data"]
             del kwargs["data"]
         if "shape" in kwargs:
-            arglist.insert(1, kwargs["shape"])
+            shape = kwargs["shape"]
             del kwargs["shape"]
-        if "default" not in kwargs and isinstance(arglist[0], MatrixABC):
-            kwargs["default"] = arglist[0]._default
-        if len(arglist) < 1:
-            raise TypeError("Expected at least 1 argument, 0 given")
-        if len(arglist) > 2:
-            raise TypeError("Unexpected argument, expected at most 2 non-keyword arguments")
-        # Extract values for data, shape and default
-        data = arglist[0]
-        if len(arglist) < 2:
-            if isinstance(data, MatrixABC):
-                shape = data._shape
-            elif isinstance(data, Sequence) and len(data) == 0:
-                shape = (0, 0)
-            elif isinstance(data, Sequence) and all(isinstance(x, Sequence) for x in data):
-                shape = (len(data), max(len(x) for x in data))
-            else:
-                raise TypeError("Missing required argument 'shape'")
-        else:
-            shape = arglist[1]
         if "default" in kwargs:
             default = kwargs["default"]
             del kwargs["default"]
-        else:
-            if isinstance(data, MatrixABC):
-                default = data._default
-            else:
-                raise TypeError("Missing required argument 'default'")
+        if "headers" in kwargs:
+            headers = kwargs["headers"]
+            del kwargs["headers"]
         if len(kwargs) > 0:
             raise TypeError(
-                f"Unexpected keyword argument(s): {', '.join(repr(k) for k in kwargs.keys())}"
+                f"{self.__class__.__name__}() got an unexpected keyword argument '{list(kwargs)[0]}'"
             )
-        # Check types for data, shape and default
-        if not isinstance(data, (MatrixABC, Sequence)):
+        # Consume positional arguments
+        arglist = list(args)
+        missing_args = []
+        if data is NotGiven:
+            try:
+                data = arglist.pop(0)
+            except IndexError:
+                missing_args.append("data")
+        if isinstance(data, Sequence) and not isseqseq(data):
+            # 'shape' required
+            if shape is NotGiven:
+                try:
+                    shape = arglist.pop(0)
+                except IndexError:
+                    missing_args.append("shape")
+        if default is NotGiven:
+            try:
+                default = arglist.pop(0)
+            except IndexError:
+                if isinstance(data, Sequence):  # only required for Sequence
+                    missing_args.append("default")
+        default = cast(T, default)
+        if headers is NotGiven:
+            try:
+                headers = arglist.pop(0)
+            except IndexError:
+                headers = False  # always optional
+        if len(arglist) > 0:
+            max_args = 3
+            if isinstance(data, Sequence) and (len(data) == 0 or isinstance(data[0], Sequence)):
+                max_args = 4
             raise TypeError(
-                f"Argument 'data' must be of type Matrix or Sequence, not {type(data)}"
+                f"{self.__class__.__name__}() expected at most {max_args} arguments but {n_args} were given"
             )
-        if (not isinstance(shape, tuple)
-                or len(shape) != 2
-                or not isinstance(shape[0], int)
-                or not isinstance(shape[1], int)):
-            _desc = (f"{type(shape)} of length {len(shape)}"
-                     if isinstance(shape, Sized)
-                     else type(shape))
-            raise TypeError(f"Argument 'shape' must be of type tuple[int, int], not {_desc}")
-        # Make sure we do not have negative shape values
-        self._check_shape(shape)
-        # Initialise matrix
+        if len(missing_args) == 1:
+            raise TypeError(
+                f"{self.__class__.__name__}() missing 1 required argument: {missing_args[0]!r}"
+            )
+        elif len(missing_args) > 1:
+            tmp = [repr(s) for s in missing_args]
+            tmp.insert(-1, "and")
+            tmp_ = " ".join(tmp) if len(missing_args) == 2 else ", ".join(tmp)
+            raise TypeError(
+                f"{self.__class__.__name__}() missing {len(missing_args)} required arguments: {tmp_}"
+            )
+        # type check arguments
+        if data is NotGiven or not isinstance(data, (Sequence, MatrixABC)):
+            raise TypeError(
+                f"argument 'data' must be of type MatrixABC | Sequence, {type(data)} given"
+            )
+        if shape is not NotGiven:
+            if not (isinstance(shape, tuple) and len(shape) == 2 and all(isinstance(i, int) for i in shape)):
+                raise TypeError(
+                    f"argument 'shape' must be of type tuple[int, int], {type(shape)} given"
+                )
+            self._check_shape(shape)  # Check for negative/impossible shape values
+        if not isinstance(data, MatrixABC) and default is NotGiven:
+            # should've been caught already!
+            raise TypeError(
+                "missing argument 'default' but not sure why - please make a bug report :)"
+            )
+        if not isinstance(headers, bool):
+            raise TypeError(
+                f"argument 'headers' must be of type bool, {type(headers)} given"
+            )
+        # Initialise from matrix
         if isinstance(data, MatrixABC):
-            self._init_from_matrix(data, shape, default)
-        if isinstance(data, Sequence):
-            if len(data) > 0 and all(isinstance(x, Sequence) for x in data):
-                self._init_from_seqseq(data, shape, default)
-            else:
-                self._init_from_sequence(data, shape, default)
+            if shape is not NotGiven:
+                raise TypeError(
+                    "argument 'shape' not allowed when initialising matrix from matrix, use slices"
+                )
+            self._init_from_matrix(data, default, headers)
+        elif isseqseq(data):
+            self._init_from_seqseq(data, default, headers)
+        else:  # must be 'Sequence'
+            data = cast(Sequence[T], data)
+            if isinstance(shape, Sentinel):
+                raise TypeError(f"argument 'shape' must be of type tuple[int, int], {type(shape)} given")
+            self._init_from_sequence(data, shape, default, headers)
         # Calculate helpers
         self._calculate_helpers()
         # Do any reshaping if needed
-        if self._shape != shape:
-            self._resize(shape)
+        # if self._shape != shape:
+        #    self._resize(shape)
 
-    def _init_from_matrix(self, data: MatrixABC[T], shape: tuple[int, int], default: T) -> None:
+    def _init_from_matrix(self, data: MatrixABC[T], default: T | Sentinel = NotGiven, headers: bool = False) -> None:
         """Initialise Matrix from another Matrix."""
         self._data = copyfunc(data._data)
         self._shape = copyfunc(data._shape)
-        self._default = copyfunc(data._default)
+        self._default = copyfunc(data._default) if default is NotGiven else cast(T, default)
 
     def _init_from_seqseq(
             self,
             data: Sequence[Sequence[T]],
-            shape: tuple[int, int],
-            default: T) -> None:
-        """Initialise Matrix from another Matrix."""
+            default: T,
+            headers: bool = False) -> None:
+        """Initialise Matrix from a sequence of sequences."""
         self._default = default
-        self._shape = shape
+        self._shape = (len(data), max(len(x) for x in data))
         self._data = []
         data = list(data)
         if len(data) < self._shape[0]:
@@ -168,7 +207,12 @@ class MatrixABC(ABC, Generic[T]):
             else:
                 self._data.append(list(row)[0:self._shape[1]])
 
-    def _init_from_sequence(self, data: Sequence[T], shape: tuple[int, int], default: T) -> None:
+    def _init_from_sequence(
+            self,
+            data: Sequence[T],
+            shape: tuple[int, int],
+            default: T,
+            headers: bool = False) -> None:
         """Initialise Matrix from another Matrix."""
         self._default = default
         self._shape = shape
@@ -1144,8 +1188,15 @@ class MatrixABC(ABC, Generic[T]):
     def _getslice(self, row: IndexT, col: IndexT) -> Self:
         rows = self._rowtoindices(row)
         cols = self._coltoindices(col)
+        data = [[self._data[r][c] for c in cols] for r in rows]
+        if data:
+            return self.__class__(  # type: ignore
+                data,
+                default=self._default
+            )
         return self.__class__(  # type: ignore
-            [[self._data[r][c] for c in cols] for r in rows],
+            [],
+            shape=(0, 0),
             default=self._default
         )
 

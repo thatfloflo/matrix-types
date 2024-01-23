@@ -1,7 +1,7 @@
 import operator
 from functools import partial
 from itertools import islice, starmap, product
-from typing import Iterable, Iterator, Sequence, TypeVar
+from typing import Iterable, Iterator, Sequence, TypeVar, TypeGuard
 
 _T = TypeVar("_T")
 
@@ -37,3 +37,8 @@ def _sumprod(vec1: Iterable[_T], vec2: Iterable[_T]) -> _T:
 def matmul(m1: Iterable[Iterable[_T]], m2: Sequence[Sequence[_T]]) -> Iterator[list[_T]]:
     """Multiply to matrices represented as iterables."""
     return chunked(starmap(_sumprod, product(m1, zip(*m2, strict=True))), len(m2[0]))
+
+
+def isseqseq(s: Sequence) -> TypeGuard[Sequence[Sequence]]:
+    """Return True if s is a sequence of sequences, False otherwise."""
+    return isinstance(s, Sequence) and len(s) > 0 and all(isinstance(x, Sequence) for x in s)

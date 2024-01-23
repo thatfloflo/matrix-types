@@ -90,3 +90,12 @@ class FrozenMatrix(MatrixABC[T]):
         new = self.copy()
         new._map(func, *args, **kwargs)
         return new
+
+    # DUNDER METHODS
+
+    def __hash__(self) -> int:
+        return hash((
+            self._default,
+            self._shape,
+            *self.values()
+        ))
